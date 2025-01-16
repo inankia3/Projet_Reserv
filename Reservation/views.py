@@ -20,22 +20,22 @@ def idEtudiant(request):
 
 #vue avec le formulaire pour entrer le code étudiant
 def codeEtud(request):
-    #if(request.method=='POST'):
+    if(request.method=='POST'):
     #on récupère et stock le numéro étudiant de l'utilisateur
-    global NumEtud
-    NumEtud=request.POST.get('inputEtud')
-    str(NumEtud)
+        global NumEtud
+        NumEtud=request.POST.get('inputEtud')
+        str(NumEtud)
+        context = {
+            'title':'Identification Etudiant',
+            'label':'Code de vérification',
+            'action_url':reverse('accueilEtud'),
+        }
+        return render(request,'formEtudiant.html',context)
 
     #si code = 0000 :  return render(request,'accueilEtud.html',context)
     # donner l'id en plus
 
     #else:
-    context = {
-        'title':'Identification Etudiant',
-        'label':'Code de vérification',
-        'action_url':reverse('accueilEtud'),
-    }
-    return render(request,'formEtudiant.html',context)
 
 # vue d'accueil une fois connecté
 def accueilEtud(request):
@@ -51,8 +51,8 @@ def accueilEtud(request):
             }
             return render(request,'erreur.html',context)
         else:
-            return HttpResponse("Bienvenu "+NumEtud)
-
+            #ajout de l'étudiant dans la base de donnée
+            return render(request,'calendrier.html')
     #si code = 0000 :  return render(request,'accueilEtud.html',context)
     # donner l'id en plus
 

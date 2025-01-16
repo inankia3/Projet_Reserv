@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Réservation de salle</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 10px;
+        }
+        .time-slot {
+            cursor: pointer;
+        }
+        .time-slot.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>Réserver un créneau</h2>
+    <form id="reservationForm">
+        <table>
+            <thead>
+                <tr>
+                    <th>Lundi</th>
+                    <th>Mardi</th>
+                    <th>Mercredi</th>
+                    <th>Jeudi</th>
+                    <th>Vendredi</th>
+                </tr>
+            </thead>
+            <tbody id="timeSlotsTable">
+                <!-- Les créneaux horaires seront générés ici par JavaScript -->
+            </tbody>
+        </table>
+        <input type="hidden" name="selected_slot" id="selectedSlot">
+        <button type="submit">Valider la sélection</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeSlotsTable = document.getElementById('timeSlotsTable');
+            const selectedSlotInput = document.getElementById('selectedSlot');
+            let selectedSlot = null;
+
+            // Générer dynamiquement les créneaux horaires
+            const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
+            for (let i = 9; i <= 17; i++) {
+                const row = document.createElement('tr');
+                days.forEach(day => {
+                    const slotCell = document.createElement('td');
+                    slotCell.classList.add('time-slot');
+                    slotCell.setAttribute('data-time', `${i}:00`);
+                    slotCell.setAttribute('data-day', day);
+                    slotCell.textContent = `${i}:00`;
+                    row.appendChild(slotCell);
+                });
+
+                timeSlotsTable.appendChild(row);
+            }
+
+            // Gérer la sélection des créneaux horaires
+            const timeSlots = document.querySelectorAll('.time-slot');
+            timeSlots.forEach(slot => {
+                slot.addEventListener('click', function() {
+                    if (selectedSlot) {
+                        selectedSlot.classList.remove('selected');
+                    }
+                    selectedSlot = slot;
+                    slot.classList.add('selected');
+                    updateSelectedSlot();
+                });
+            });
+
+            function updateSelectedSlot() {
+                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-day') + ' ' + selectedSlot.getAttribute('data-time') : '';
+            }
+
+            document.getElementById('reservationForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                alert('Créneau sélectionné : ' + selectedSlotInput.value);
+                // Envoyer les données sélectionnées au serveur si nécessaire
+            });
+        });
+    </script>
+</body>
+</html>
