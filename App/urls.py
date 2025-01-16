@@ -23,5 +23,7 @@ urlpatterns = [
     path('',views.index,name='index'),
     path('idEtudiant/',views.idEtudiant,name='idEtudiant'),
     path('codeEtud/',views.codeEtud,name='codeEtud'),
+    path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
+
     path('Reservation/',views.index,name='index')
 ]

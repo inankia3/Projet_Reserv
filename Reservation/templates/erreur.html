@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+<body>
+    Erreur : {{error}}
+    <form method="POST" action="{{action_url}}">
+        {% csrf_token %}
+        Retour à l'accueil
+        <input type="submit" value="Valider">
+    </form>
+</body>
+</html>
