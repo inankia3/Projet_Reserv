@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+<body>
+    <form method="POST" action="{{action_url}}">
+        {% csrf_token %}
+        <label for="inputEtud"> {{label}}:</label>
+        <input type="text" id="inputEtud" name="inputEtud">
+        <input type="submit" value="Valider">
+    </form>
+</body>
+</html>

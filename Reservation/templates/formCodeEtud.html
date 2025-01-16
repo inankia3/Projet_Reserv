@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Identification Etudiant</title>
+</head>
+<body>
+    <form method="POST" action="{% url 'codeEtud' %}">
+        {% csrf_token %}
+        <label for="numEtud">Numéro étudiant:</label>
+        <input type="text" id="numEtud" name="numEtud">
+        <input type="submit" value="Valider">
+    </form>
+</body>
+</html>
