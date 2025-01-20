@@ -51,10 +51,12 @@ def accueilEtud(request):
             }
             return render(request,'erreur.html',context)
         else:
+            context = {
+                'action_url':reverse('calendrier15'),
+            }
             #ajout de l'étudiant dans la base de donnée
-            return render(request,'calendrier.html')
-    #si code = 0000 :  return render(request,'accueilEtud.html',context)
-    # donner l'id en plus
+            return render(request,'calendrier.html',context)
+
 
     else:
         context = {
@@ -63,4 +65,14 @@ def accueilEtud(request):
             'action_url':reverse('accueilEtud'),
         }
         return render(request,'formEtudiant.html',context)
-    
+
+def calendrier15(request):
+    if(request.method=='POST'):
+        creneau=request.POST.get('selected_slot')
+        #vérifie le code de vérification entré
+        #context = {
+        #    'action_url':reverse('validation'),
+        #}
+        #return render(request,'calendrier15.html',context)
+        return render(request,'calendrier15.html')
+

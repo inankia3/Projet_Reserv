@@ -23,15 +23,18 @@
 </head>
 <body>
     <h2>Réserver un créneau</h2>
-    <form id="reservationForm">
+    <form id="reservationForm" method="POST" action={{action_url}}>
+        {% csrf_token %}
+        
+        <label for="weekSelector">Sélectionner une semaine :</label>
+        <select id="weekSelector">
+            <!-- Les options pour les semaines seront générées par JavaScript -->
+        </select>
+
         <table>
             <thead>
-                <tr>
-                    <th>Lundi</th>
-                    <th>Mardi</th>
-                    <th>Mercredi</th>
-                    <th>Jeudi</th>
-                    <th>Vendredi</th>
+                <tr id="daysHeader">
+                    <!-- Les en-têtes des jours seront générées ici par JavaScript -->
                 </tr>
             </thead>
             <tbody id="timeSlotsTable">
@@ -46,46 +49,97 @@
         document.addEventListener('DOMContentLoaded', function() {
             const timeSlotsTable = document.getElementById('timeSlotsTable');
             const selectedSlotInput = document.getElementById('selectedSlot');
+            const weekSelector = document.getElementById('weekSelector');
+            const daysHeader = document.getElementById('daysHeader');
             let selectedSlot = null;
 
-            // Générer dynamiquement les créneaux horaires
-            const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
-            for (let i = 9; i <= 17; i++) {
-                const row = document.createElement('tr');
-                days.forEach(day => {
-                    const slotCell = document.createElement('td');
-                    slotCell.classList.add('time-slot');
-                    slotCell.setAttribute('data-time', `${i}:00`);
-                    slotCell.setAttribute('data-day', day);
-                    slotCell.textContent = `${i}:00`;
-                    row.appendChild(slotCell);
-                });
+            // Générer dynamiquement les options du sélecteur de semaine
+            function generateWeekOptions() {
+                const currentDate = new Date();
+                const currentDay = currentDate.getDay();
+                const daysUntilMonday = (currentDay + 6) % 7;
+                currentDate.setDate(currentDate.getDate() - daysUntilMonday); // Se déplacer au lundi de la semaine actuelle
+                
+                for (let i = 0; i <= 5; i++) {
+                    const option = document.createElement('option');
+                    const startOfWeek = new Date(currentDate);
+                    startOfWeek.setDate(startOfWeek.getDate() + i * 7);
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(endOfWeek.getDate() + 4); // Jusqu'à vendredi
 
-                timeSlotsTable.appendChild(row);
+                    const startStr = `${startOfWeek.getDate()} ${startOfWeek.toLocaleString('default', { month: 'short' })} ${startOfWeek.getFullYear()}`;
+                    const endStr = `${endOfWeek.getDate()} ${endOfWeek.toLocaleString('default', { month: 'short' })} ${endOfWeek.getFullYear()}`;
+                    option.value = startOfWeek.toISOString().split('T')[0];
+                    option.textContent = `${startStr} - ${endStr}`;
+                    weekSelector.appendChild(option);
+                }
+            }
+
+            // Générer dynamiquement les en-têtes de jours avec dates
+            function generateDaysHeader(weekStart) {
+                daysHeader.innerHTML = '';
+                const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+                for (let i = 0; i < days.length; i++) {
+                    const th = document.createElement('th');
+                    const currentDate = new Date(weekStart);
+                    currentDate.setDate(currentDate.getDate() + i);
+                    const dateStr = `${days[i]} ${currentDate.getDate()} ${currentDate.toLocaleString('default', { month: 'long' })}`;
+                    th.textContent = dateStr;
+                    daysHeader.appendChild(th);
+                }
+            }
+
+            // Générer dynamiquement les créneaux horaires
+            function generateTimeSlots(weekStart) {
+                timeSlotsTable.innerHTML = '';
+                const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+                for (let i = 9; i <= 17; i++) {
+                    const row = document.createElement('tr');
+                    days.forEach((day, index) => {
+                        const slotCell = document.createElement('td');
+                        const currentDate = new Date(weekStart);
+                        currentDate.setDate(currentDate.getDate() + index);
+                        slotCell.classList.add('time-slot');
+                        slotCell.setAttribute('data-time', `${i}:00`);
+                        slotCell.setAttribute('data-day', day);
+                        slotCell.setAttribute('data-date', currentDate.toISOString().split('T')[0]);
+                        slotCell.textContent = `${i}:00`;
+                        row.appendChild(slotCell);
+                    });
+                    timeSlotsTable.appendChild(row);
+                }
             }
 
             // Gérer la sélection des créneaux horaires
-            const timeSlots = document.querySelectorAll('.time-slot');
-            timeSlots.forEach(slot => {
-                slot.addEventListener('click', function() {
-                    if (selectedSlot) {
-                        selectedSlot.classList.remove('selected');
-                    }
-                    selectedSlot = slot;
-                    slot.classList.add('selected');
-                    updateSelectedSlot();
+            function handleTimeSlotSelection() {
+                const timeSlots = document.querySelectorAll('.time-slot');
+                timeSlots.forEach(slot => {
+                    slot.addEventListener('click', function() {
+                        if (selectedSlot) {
+                            selectedSlot.classList.remove('selected');
+                        }
+                        selectedSlot = slot;
+                        slot.classList.add('selected');
+                        updateSelectedSlot();
+                    });
                 });
-            });
-
-            function updateSelectedSlot() {
-                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-day') + ' ' + selectedSlot.getAttribute('data-time') : '';
             }
 
-            document.getElementById('reservationForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-                alert('Créneau sélectionné : ' + selectedSlotInput.value);
-                // Envoyer les données sélectionnées au serveur si nécessaire
+            function updateSelectedSlot() {
+                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-date') + ' ' + selectedSlot.getAttribute('data-time') : '';
+            }
+
+            // Générer les créneaux horaires pour la semaine sélectionnée
+            weekSelector.addEventListener('change', function() {
+                const selectedWeekStart = new Date(weekSelector.value);
+                generateDaysHeader(selectedWeekStart);
+                generateTimeSlots(selectedWeekStart);
+                handleTimeSlotSelection();
             });
+
+            // Initialiser les options de semaine et les créneaux horaires
+            generateWeekOptions();
+            weekSelector.dispatchEvent(new Event('change')); // Générer les créneaux pour la première semaine par défaut
         });
     </script>
 </body>
