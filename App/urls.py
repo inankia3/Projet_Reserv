@@ -29,6 +29,6 @@ urlpatterns = [
     path('adminLogin/',views.adminLogin,name='adminLogin'),
 
     path('accueilAdmin/',views.accueilAdmin,name='accueilAdmin'),
-
+    path('profilAdmin/',views.profilAdmin,name='profilAdmin'),
     path('Reservation/',views.index,name='index')
 ]

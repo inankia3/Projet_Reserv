@@ -10,9 +10,22 @@ import json
 '''
 # Create your views here.
 NumEtud=''
+
+# Données fictives pour l'exemple
 admin_username = 'admin'
 admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas 
 Admin_=False
+
+students = [
+    {'student_number': 'E12345', 'name': 'Jean Dupont', 'blocked': False},
+    {'student_number': 'E67890', 'name': 'Marie Curie', 'blocked': True},
+]
+
+reservations_today = [
+    {'student_number': 'E12345', 'box_number': 'Box 1', 'time': '09:00 - 10:00'},
+    {'student_number': 'E67890', 'box_number': 'Box 2', 'time': '10:00 - 11:00'},
+]
+
 def index(request):
    texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
    texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
@@ -196,3 +209,11 @@ def accueilAdmin(request):
         'action_url': reverse('accueilAdmin'),  # L'action du formulaire pointe vers la même vue
     }
     return render(request, 'calendrierAdmin.html', context)
+
+def profilAdmin(request):
+    context = {
+        'title': 'Profil Admin',
+        'students': students,
+        'reservations_today': reservations_today,
+    }
+    return render(request, 'profilAdmin.html', context)
