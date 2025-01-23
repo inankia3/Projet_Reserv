@@ -4,8 +4,20 @@ from django.urls import reverse
 
 # Create your views here.
 NumEtud=''
+
 admin_username = 'admin'
 admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas utiliser en production
+
+# Données simulées pour les réservations (à remplacer par des données de la base de données)
+reservations = [
+    {'date': '2025-01-24', 'time': '09:00', 'student': 'E12345'},
+    {'date': '2025-01-25', 'time': '10:00', 'student': 'E67890'},
+]
+
+# Données simulées pour les créneaux bloqués (à remplacer par des données de la base de données)
+blocked_slots = [
+    {'date': '2025-01-24', 'time': '14:00'},
+]
 
 def index(request):
     texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
@@ -19,7 +31,7 @@ def adminLogin(request):
         password = request.POST.get('password')
         if username == admin_username and password == admin_password:
             # Redirection vers le tableau de bord de l'admin
-            return redirect('adminDashboard')
+            return redirect('acceuilAdmin')
         else:
             context = {
                 'title': 'Connexion Admin',
@@ -31,7 +43,23 @@ def adminLogin(request):
             'title': 'Connexion Admin',
         }
         return render(request, 'adminLogin.html', context)
-    
+
+def acceuilAdmin(request):
+    if request.method == 'POST':
+        # Gérer la soumission du formulaire pour bloquer un créneau
+        selected_slot = request.POST.get('selected_slot')
+        if selected_slot:
+            date, time = selected_slot.split(' ')
+            blocked_slots.append({'date': date, 'time': time})
+        
+    context = {
+        'title': 'Gestion des réservations - Admin',
+        'reservations': reservations,
+        'blocked_slots': blocked_slots,
+        'action_url': reverse('acceuilAdmin'),  # L'action du formulaire pointe vers la même vue
+    }
+    return render(request, 'calendrierAdmin.html', context)
+
 #vue avec le formulaire pour entrer le code étudiant
 def idEtudiant(request):
     context = {
