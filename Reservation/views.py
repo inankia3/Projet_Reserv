@@ -1,67 +1,22 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import HttpResponse
 from django.urls import reverse
+from .models import *
+'''
+from django.http import JsonResponse
 
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+'''
 # Create your views here.
 NumEtud=''
-
 admin_username = 'admin'
-admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas utiliser en production
-
-# Données simulées pour les réservations (à remplacer par des données de la base de données)
-reservations = [
-    {'date': '2025-01-24', 'time': '10:00', 'student': 'E12345'},
-]
-
-# Données simulées pour les créneaux bloqués (à remplacer par des données de la base de données)
-blocked_slots = [
-    {'date': '2025-01-24', 'time': '14:00'},
-]
-
+admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas 
+Admin_=False
 def index(request):
-    texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
-    texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
-    return HttpResponse(texte)
-
-# Vue pour la connexion de l'admin
-def adminLogin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        # Vérification des identifiants (simplifiée pour l'exemple)
-        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
-            # Redirection vers la vue acceuilAdmin après une connexion réussie
-            return redirect('acceuilAdmin')
-        else:
-            # Si les identifiants sont incorrects, afficher un message d'erreur
-            context = {
-                'title': 'Connexion Admin',
-                'error': 'Identifiants incorrects',
-            }
-            return render(request, 'adminLogin.html', context)
-    else:
-        # Si la méthode est GET, afficher le formulaire de connexion
-        context = {
-            'title': 'Connexion Admin',
-        }
-        return render(request, 'adminLogin.html', context)
-
-def acceuilAdmin(request):
-    if request.method == 'POST':
-        # Gérer la soumission du formulaire pour bloquer un créneau
-        selected_slot = request.POST.get('selected_slot')
-        if selected_slot:
-            date, time = selected_slot.split(' ')
-            blocked_slots.append({'date': date, 'time': time})
-        
-    context = {
-        'title': 'Gestion des réservations - Admin',
-        'reservations': reservations,
-        'blocked_slots': blocked_slots,
-        'action_url': reverse('acceuilAdmin'),  # L'action du formulaire pointe vers la même vue
-    }
-    return render(request, 'calendrierAdmin.html', context)
+   texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
+   texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
+   return HttpResponse(texte)
 
 #vue avec le formulaire pour entrer le code étudiant
 def idEtudiant(request):
@@ -109,13 +64,36 @@ def accueilEtud(request):
             if not idetud:
                 etud=Etudiant(num_etudiant=NumEtud)
                 etud.save()
-                
             context = {
                 'action_url':reverse('calendrier15'),
             }
-            #ajout de l'étudiant dans la base de donnée
             return render(request,'calendrier.html',context)
+            '''            #MODIF
+            creneaux = Creneau.objects.all()
+            grouped_creneaux = {}
 
+        for creneau in creneaux:
+            heure_debut = creneau.heure_debut.strftime('%H:%M:00')
+            heure_fin = creneau.heure_fin.strftime('%H:%M:00')
+            if heure_debut.endswith(':00:00'):
+                grouped_creneaux[heure_debut] = []
+
+            grouped_creneaux[heure_debut].append({
+                'heure_debut': heure_debut,
+                'heure_fin':creneau.heure_debut.strftime('%H:00:00')
+            })
+
+            grouped_creneaux_json = json.dumps(grouped_creneaux, cls=DjangoJSONEncoder)
+            print("test1",grouped_creneaux)
+
+            print("test",grouped_creneaux_json)
+            context = {
+                'action_url':reverse('calendrier15'),
+                'grouped_creneaux':  grouped_creneaux_json,
+            }
+            #return render(request, 'calendrier.html', context)
+            
+            #ajout de l'étudiant dans la base de donnée'''
 
     else:
         context = {
@@ -128,12 +106,12 @@ def accueilEtud(request):
 def calendrier15(request):
     if(request.method=='POST'):
         creneau=request.POST.get('selected_slot')
-        #vérifie le code de vérification entré
         #context = {
         #    'action_url':reverse('validation'),
         #}
         #return render(request,'calendrier15.html',context)
         return render(request,'calendrier15.html')
+
 
 # Nouvelle vue pour le profil de l'étudiant
 def profilEtudiant(request):
@@ -153,3 +131,68 @@ def profilEtudiant(request):
         'student_number': NumEtud
     }
     return render(request, 'profilEtudiant.html', context)
+
+# Vue pour la connexion de l'admin
+def adminLogin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        identifiant=Admin.objects.filter(identifiant=username,mdp=password)
+        if identifiant:
+            # Redirection vers le tableau de bord de l'admin
+            global Admin_
+            Admin_=True
+            return redirect('accueilAdmin')
+        else:
+            context = {
+                'title': 'Connexion Admin',
+                'error': 'Identifiants incorrects',
+            }
+            return render(request, 'adminLogin.html', context)
+    else:
+        context = {
+            'title': 'Connexion Admin',
+        }
+        return render(request, 'adminLogin.html', context)
+    
+
+# Vue pour la connexion de l'admin
+def adminLogin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Vérification des identifiants (simplifiée pour l'exemple)
+        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
+            # Redirection vers la vue acceuilAdmin après une connexion réussie
+            return redirect('accueilAdmin')
+        else:
+            # Si les identifiants sont incorrects, afficher un message d'erreur
+            context = {
+                'title': 'Connexion Admin',
+                'error': 'Identifiants incorrects',
+            }
+            return render(request, 'adminLogin.html', context)
+    else:
+        # Si la méthode est GET, afficher le formulaire de connexion
+        context = {
+            'title': 'Connexion Admin',
+        }
+        return render(request, 'adminLogin.html', context)
+
+def accueilAdmin(request):
+    '''if request.method == 'POST':
+        # Gérer la soumission du formulaire pour bloquer un créneau
+        selected_slot = request.POST.get('selected_slot')
+        if selected_slot:
+            date, time = selected_slot.split(' ')
+            blocked_slots.append({'date': date, 'time': time})
+    '''
+    context = {
+        'title': 'Gestion des réservations - Admin',
+        #'reservations': reservations,
+        #'blocked_slots': blocked_slots,
+        'action_url': reverse('accueilAdmin'),  # L'action du formulaire pointe vers la même vue
+    }
+    return render(request, 'calendrierAdmin.html', context)

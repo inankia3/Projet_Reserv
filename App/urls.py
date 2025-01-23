@@ -21,12 +21,14 @@ from Reservation import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.index,name='index'),
-    path('adminLogin/',views.adminLogin,name='adminLogin'),
     path('idEtudiant/',views.idEtudiant,name='idEtudiant'),
     path('codeEtud/',views.codeEtud,name='codeEtud'),
-    path('acceuilAdmin/',views.acceuilAdmin,name='acceuilAdmin'),
     path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
     path('calendrier15/',views.calendrier15,name='calendrier15'),
     path('profilEtudiant/',views.profilEtudiant,name='profilEtudiant'),
+    path('adminLogin/',views.adminLogin,name='adminLogin'),
+
+    path('accueilAdmin/',views.accueilAdmin,name='accueilAdmin'),
+
     path('Reservation/',views.index,name='index')
 ]

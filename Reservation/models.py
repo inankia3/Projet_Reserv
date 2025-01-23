@@ -3,8 +3,8 @@ from django.db import models
 
 class Etudiant(models.Model):
     num_etudiant = models.CharField(unique=True, max_length=8)
-    autorise = models.BooleanField(blank=True, null=True)
-    date_derniere_reserv = models.DateTimeField()
+    autorise = models.BooleanField(default=True, null=True)
+    date_derniere_reserv = models.DateTimeField(null=True)
 
     class Meta:
         managed = False
@@ -32,8 +32,8 @@ class Reservation(models.Model):
 
 
 class Admin(models.Model):
-    identifiant = models.CharField(max_length=50)
-    mdp = models.CharField(max_length=50)
+    identifiant = models.CharField(max_length=200)
+    mdp = models.CharField(max_length=200)
 
     class Meta:
         managed = False
