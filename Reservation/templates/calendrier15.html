@@ -23,11 +23,22 @@
             background-color: #4CAF50;
             color: white;
         }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
     <h2>Réserver un créneau de 15 minutes</h2>
-    <form id="reservationDetailForm" method="POST"  >
+    <form id="reservationDetailForm" method="POST" >
         {% csrf_token %}
 
         <table>
@@ -44,18 +55,24 @@
         <button type="submit">Valider la sélection</button>
     </form>
 
+    <button class="back-button" onclick="goBack()">Retour</button>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const timeSlotsTable = document.getElementById('timeSlotsTable');
             const selectedSlotInput = document.getElementById('selectedSlot');
             let selectedSlot = null;
 
-            // Les créneaux de 15 minutes et les créneaux réservés sont passés depuis Django
-            const timeSlots = JSON.parse('{{ time_slots|safe }}');
-            const bookedSlots = JSON.parse('{{ booked_slots|safe }}');
+            // Exemple de données pour les créneaux de 15 minutes (passées par le backend Django)
+            const timeSlots = [
+                '09:00 - 09:15',
+                '09:15 - 09:30',
+                '09:30 - 09:45',
+                '09:45 - 10:00'
+            ];
+            const bookedSlots = JSON.parse('{{ booked_slots|safe }}'); // Créneaux réservés
 
-
-            // Générer dynamiquement les créneaux horaires de 15 minutes
+            // Générer les créneaux horaires de 15 minutes
             timeSlots.forEach(slotTime => {
                 const row = document.createElement('tr');
                 const slotCell = document.createElement('td');
@@ -86,11 +103,16 @@
             }
 
             document.getElementById('reservationDetailForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-                alert('Créneau sélectionné : ' + selectedSlotInput.value);
-                // Envoyer les données sélectionnées au serveur si nécessaire
+                if (!selectedSlotInput.value) {
+                    event.preventDefault();
+                    alert('Veuillez sélectionner un créneau avant de valider.');
+                }
             });
         });
+
+        function goBack() {
+            window.history.back();
+        }
     </script>
 </body>
 </html>

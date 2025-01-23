@@ -76,3 +76,21 @@ def calendrier15(request):
         #return render(request,'calendrier15.html',context)
         return render(request,'calendrier15.html')
 
+# Nouvelle vue pour le profil de l'étudiant
+def profilEtudiant(request):
+    reservations_a_venir = [ #à modifier pour récupérer les données de la base de données
+        {'date': '2025-01-24', 'creneau': '09:00 - 09:15'},
+        {'date': '2025-01-25', 'creneau': '10:15 - 10:30'}
+    ]
+    reservations_passees = [ #à modifier pour récupérer les données de la base de données
+        {'date': '2025-01-20', 'creneau': '11:00 - 11:15'},
+        {'date': '2025-01-21', 'creneau': '12:45 - 13:00'}
+    ]
+
+    context = {
+        'title': 'Profil Etudiant',
+        'reservations_a_venir': reservations_a_venir,
+        'reservations_passees': reservations_passees,
+        'student_number': NumEtud
+    }
+    return render(request, 'profilEtudiant.html', context)

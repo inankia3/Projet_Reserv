@@ -25,6 +25,6 @@ urlpatterns = [
     path('codeEtud/',views.codeEtud,name='codeEtud'),
     path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
     path('calendrier15/',views.calendrier15,name='calendrier15'),
-
+    path('profilEtudiant/',views.profilEtudiant,name='profilEtudiant'),
     path('Reservation/',views.index,name='index')
 ]

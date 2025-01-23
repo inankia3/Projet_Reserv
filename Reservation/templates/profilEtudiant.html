@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profil Étudiant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .back-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Profil Étudiant</h2>
+    <p><strong>Numéro étudiant :</strong> {{ student_number }}</p>
+
+    <div class="section">
+        <h3>Réservations à venir</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Créneax/th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_a_venir %}
+                <tr>
+                    <td>{{ reservation.date }}</td>
+                    <td>{{ reservation.creneau }}</td>
+                </tr>
+                {% endfor %}
+                {% if reservations_a_venir|length == 0 %}
+                <tr>
+                    <td colspan="2">Aucune réservation à venir.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Réservations passées</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Créneau</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_passees %}
+                <tr>
+                    <td>{{ reservation.date }}</td>
+                    <td>{{ reservation.creneau }}</td>
+                </tr>
+                {% endfor %}
+                {% if reservations_passees|length == 0 %}
+                <tr>
+                    <td colspan="2">Aucune réservation passée.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="javascript:history.back()" class="back-button">Retour</a>
+</body>
+</html>

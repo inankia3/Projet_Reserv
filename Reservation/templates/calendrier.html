@@ -19,13 +19,33 @@
             background-color: #4CAF50;
             color: white;
         }
+        .profile-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .profile-button:hover {
+            background-color: #1976D2;
+        }
     </style>
 </head>
 <body>
     <h2>Réserver un créneau</h2>
-    <form id="reservationForm" method="POST" action={{action_url}}>
+    
+    <!-- Bouton profil -->
+    <button class="profile-button" onclick="goToProfilePage()">
+        Profil (Numéro étudiant: {{ student_number }})
+    </button>
+
+    <form id="reservationForm" method="POST" action="{{ action_url }}">
         {% csrf_token %}
-        
+
         <label for="weekSelector">Sélectionner une semaine :</label>
         <select id="weekSelector">
             <!-- Les options pour les semaines seront générées par JavaScript -->
@@ -59,7 +79,7 @@
                 const currentDay = currentDate.getDay();
                 const daysUntilMonday = (currentDay + 6) % 7;
                 currentDate.setDate(currentDate.getDate() - daysUntilMonday); // Se déplacer au lundi de la semaine actuelle
-                
+
                 for (let i = 0; i <= 5; i++) {
                     const option = document.createElement('option');
                     const startOfWeek = new Date(currentDate);
@@ -141,6 +161,10 @@
             generateWeekOptions();
             weekSelector.dispatchEvent(new Event('change')); // Générer les créneaux pour la première semaine par défaut
         });
+
+        function goToProfilePage() {
+            window.location.href = "/profileEtudiant"; // Rediriger vers la page du profil de l'étudiant
+        }
     </script>
 </body>
 </html>
