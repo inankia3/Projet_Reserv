@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Etudiant(models.Model):
-    num_etudiant = models.CharField(unique=True)
+    num_etudiant = models.CharField(unique=True, max_length=8)
     autorise = models.BooleanField(blank=True, null=True)
     date_derniere_reserv = models.DateTimeField()
 
@@ -32,8 +32,8 @@ class Reservation(models.Model):
 
 
 class Admin(models.Model):
-    identifiant = models.CharField()
-    mdp = models.CharField()
+    identifiant = models.CharField(max_length=50)
+    mdp = models.CharField(max_length=50)
 
     class Meta:
         managed = False
