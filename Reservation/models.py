@@ -1,37 +1,40 @@
 from django.db import models
 
-class Box(models.Model):
-    numero = models.IntegerField()
-    bat_nom = models.CharField(max_length=20)
 
 class Etudiant(models.Model):
-    num_etudiant = models.CharField(max_length=255, unique=True)
-    autorise = models.BooleanField(default=True)
+    num_etudiant = models.CharField(unique=True)
+    autorise = models.BooleanField(blank=True, null=True)
     date_derniere_reserv = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'Etudiant'
+
 
 class Creneau(models.Model):
     heure_debut = models.TimeField()
     heure_fin = models.TimeField()
 
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if self.heure_debut >= self.heure_fin:
-            raise ValidationError('L\'heure de début doit être inférieure à l\'heure de fin.')
+    class Meta:
+        managed = False
+        db_table = 'Creneau'
 
 class Reservation(models.Model):
-    STATUT_CHOICES = [
-        ('passee', 'Passée'),
-        ('en_cours', 'En cours'),
-        ('a_venir', 'À venir'),
-    ]
-
-    etudiant = models.ForeignKey(Etudiant, on_delete=models.CASCADE)
-    box = models.ForeignKey(Box, on_delete=models.CASCADE)
-    date = models.DateField()
-    creneau = models.ForeignKey(Creneau, on_delete=models.CASCADE)
-    statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='a_venir')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    etudiant = models.ForeignKey('Etudiant', models.DO_NOTHING)
+    box_id = models.IntegerField()
+    date_field = models.DateField(db_column='date_')  # Field renamed because it ended with '_'.
+    creneau = models.ForeignKey('Creneau', models.DO_NOTHING)
+    admin_field = models.BooleanField(db_column='admin_')  # Field renamed because it ended with '_'.
 
     class Meta:
-        unique_together = ('etudiant', 'box', 'date', 'creneau')
+        managed = False
+        db_table = 'Reservation'
+
+
+class Admin(models.Model):
+    identifiant = models.CharField()
+    mdp = models.CharField()
+
+    class Meta:
+        managed = False
+        db_table = 'Admin'
