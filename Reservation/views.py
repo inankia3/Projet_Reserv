@@ -4,11 +4,34 @@ from django.urls import reverse
 
 # Create your views here.
 NumEtud=''
+admin_username = 'admin'
+admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas utiliser en production
+
 def index(request):
     texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
-    texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href=''><button>Admin</button></a>"
+    texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
     return HttpResponse(texte)
 
+# Vue pour la connexion de l'admin
+def adminLogin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if username == admin_username and password == admin_password:
+            # Redirection vers le tableau de bord de l'admin
+            return redirect('adminDashboard')
+        else:
+            context = {
+                'title': 'Connexion Admin',
+                'error': 'Identifiants incorrects',
+            }
+            return render(request, 'adminLogin.html', context)
+    else:
+        context = {
+            'title': 'Connexion Admin',
+        }
+        return render(request, 'adminLogin.html', context)
+    
 #vue avec le formulaire pour entrer le code étudiant
 def idEtudiant(request):
     context = {

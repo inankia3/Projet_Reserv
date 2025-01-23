@@ -21,6 +21,7 @@ from Reservation import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.index,name='index'),
+    path('adminLogin/',views.adminLogin,name='adminLogin'),
     path('idEtudiant/',views.idEtudiant,name='idEtudiant'),
     path('codeEtud/',views.codeEtud,name='codeEtud'),
     path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
