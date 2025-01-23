@@ -58,7 +58,7 @@
             <tbody>
                 {% for student in students %}
                 <tr>
-                    <td><a href="{% url 'profilEtudiant' student.student_number %}">{{ student.student_number }}</a></td>
+                    <td><a href="{% url 'profilEtudiant' student.num_etudiant %}">{{ student.student_number }}</a></td>
                     <td>{{ student.name }}</td>
                     <td class="{% if student.blocked %}blocked{% endif %}">
                         {% if student.blocked %}Bloqué{% else %}Actif{% endif %}

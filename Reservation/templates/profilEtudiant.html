@@ -36,31 +36,11 @@
         .back-button:hover {
             background-color: #45a049;
         }
-        .block-button {
-            padding: 10px 20px;
-            background-color: #ff4444;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .block-button:hover {
-            background-color: #cc0000;
-        }
     </style>
 </head>
 <body>
     <h2>Profil Étudiant</h2>
-    <p><strong>Numéro étudiant :</strong> {{ student.student_number }}</p>
-    <p><strong>Statut :</strong> {% if student.blocked %}Bloqué{% else %}Actif{% endif %}</p>
-
-    <!-- Bouton pour bloquer/débloquer l'étudiant (visible uniquement pour l'admin) -->
-    <form action="{% url 'toggleBlockStudent' student.student_number %}" method="post" style="margin-bottom: 20px;">
-        {% csrf_token %}
-        <button type="submit" class="block-button">
-            {% if student.blocked %}Débloquer l'étudiant{% else %}Bloquer l'étudiant{% endif %}
-        </button>
-    </form>
+    <p><strong>Numéro étudiant :</strong> {{ student_number }}</p>
 
     <div class="section">
         <h3>Réservations à venir</h3>
@@ -74,8 +54,8 @@
             <tbody>
                 {% for reservation in reservations_a_venir %}
                 <tr>
-                    <td>{{ reservation.date }}</td>
-                    <td>{{ reservation.creneau }}</td>
+                    <td>{{ reservation.date_field }}</td>
+                    <td>{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
                 </tr>
                 {% endfor %}
                 {% if reservations_a_venir|length == 0 %}
@@ -99,8 +79,8 @@
             <tbody>
                 {% for reservation in reservations_passees %}
                 <tr>
-                    <td>{{ reservation.date }}</td>
-                    <td>{{ reservation.creneau }}</td>
+                    <td>{{ reservation.date_field }}</td>
+                    <td>{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
                 </tr>
                 {% endfor %}
                 {% if reservations_passees|length == 0 %}

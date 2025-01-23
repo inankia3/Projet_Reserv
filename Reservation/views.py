@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect,  get_object_or_404
 from django.shortcuts import HttpResponse
 from django.urls import reverse
 from .models import *
+from datetime import date
 '''
 from django.http import JsonResponse
 
@@ -10,22 +11,10 @@ import json
 '''
 # Create your views here.
 NumEtud=''
-
-# Données fictives pour l'exemple
 admin_username = 'admin'
 admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas 
 Admin_=False
-
-students = [
-    {'student_number': 'E12345', 'name': 'Jean Dupont', 'blocked': False},
-    {'student_number': 'E67890', 'name': 'Marie Curie', 'blocked': True},
-]
-
-reservations_today = [
-    {'student_number': 'E12345', 'box_number': 'Box 1', 'time': '09:00 - 10:00'},
-    {'student_number': 'E67890', 'box_number': 'Box 2', 'time': '10:00 - 11:00'},
-]
-
+idEtud=0
 def index(request):
    texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
    texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
@@ -61,6 +50,7 @@ def codeEtud(request):
 
 # vue d'accueil une fois connecté
 def accueilEtud(request):
+    global NumEtud
     if(request.method=='POST'):
         code=request.POST.get('inputEtud')
         str(code)
@@ -77,8 +67,11 @@ def accueilEtud(request):
             if not idetud:
                 etud=Etudiant(num_etudiant=NumEtud)
                 etud.save()
+            global idEtud
+            idEtud=idetud
             context = {
                 'action_url':reverse('calendrier15'),
+                'student_number':NumEtud
             }
             return render(request,'calendrier.html',context)
             '''            #MODIF
@@ -128,20 +121,21 @@ def calendrier15(request):
 
 # Nouvelle vue pour le profil de l'étudiant
 def profilEtudiant(request):
-    reservations_a_venir = [ #à modifier pour récupérer les données de la base de données
-        {'date': '2025-01-24', 'creneau': '09:00 - 09:15'},
-        {'date': '2025-01-25', 'creneau': '10:15 - 10:30'}
-    ]
-    reservations_passees = [ #à modifier pour récupérer les données de la base de données
-        {'date': '2025-01-20', 'creneau': '11:00 - 11:15'},
-        {'date': '2025-01-21', 'creneau': '12:45 - 13:00'}
-    ]
+    global idEtud
+    global NumEtud
+    date_=date.today()
+    #__gt signifie plus grand que : greater than or equal to
+    reservations_a_venir=Reservation.objects.filter(etudiant__in=idEtud).filter(date_field__gte=date_).order_by('date_field')
+    print(f"a venir :{list(reservations_a_venir)}")
+ 
+    reservations_passees=Reservation.objects.filter(etudiant__in=idEtud).filter(date_field__lt=date_).order_by('-date_field')
+    print(f"passee :{list(reservations_passees)}")
 
     context = {
         'title': 'Profil Etudiant',
         'reservations_a_venir': reservations_a_venir,
         'reservations_passees': reservations_passees,
-        'student_number': NumEtud
+        'student_number': NumEtud,
     }
     return render(request, 'profilEtudiant.html', context)
 
@@ -170,6 +164,30 @@ def adminLogin(request):
         return render(request, 'adminLogin.html', context)
     
 
+# Vue pour la connexion de l'admin
+def adminLogin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Vérification des identifiants (simplifiée pour l'exemple)
+        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
+            # Redirection vers la vue acceuilAdmin après une connexion réussie
+            return redirect('accueilAdmin')
+        else:
+            # Si les identifiants sont incorrects, afficher un message d'erreur
+            context = {
+                'title': 'Connexion Admin',
+                'error': 'Identifiants incorrects',
+            }
+            return render(request, 'adminLogin.html', context)
+    else:
+        # Si la méthode est GET, afficher le formulaire de connexion
+        context = {
+            'title': 'Connexion Admin',
+        }
+        return render(request, 'adminLogin.html', context)
+
 def accueilAdmin(request):
     '''if request.method == 'POST':
         # Gérer la soumission du formulaire pour bloquer un créneau
@@ -187,21 +205,25 @@ def accueilAdmin(request):
     return render(request, 'calendrierAdmin.html', context)
 
 def profilAdmin(request):
+    students=Etudiant.objects.all()
+    reservation_jour=Reservation.objects.filter(date_field=date.today())
     context = {
         'title': 'Profil Admin',
         'students': students,
-        'reservations_today': reservations_today,
+        'reservations_today': reservation_jour,
     }
     return render(request, 'profilAdmin.html', context)
 
+
 def toggleBlockStudent(request, student_number):
+    students=Etudiant.objects.all()
     # Trouver l'étudiant dans la liste simulée
-    student = next((s for s in students if s['student_number'] == student_number), None)
+    student = next((s for s in students if s['num_etudiant'] == student_number), None)
     if not student:
         return HttpResponse("Étudiant non trouvé", status=404)
 
     # Inverser l'état de blocage de l'étudiant
-    student['blocked'] = not student['blocked']
+    #student['blocked'] = not student['blocked']
 
     # Rediriger vers le profil de l'étudiant
     return redirect('profilEtudiant', student_number=student_number)
