@@ -74,6 +74,11 @@ def accueilEtud(request):
             }
             return render(request,'erreur.html',context)
         else:
+            idetud=Etudiant.objects.filter(num_etudiant=NumEtud)
+            if not idetud:
+                etud=Etudiant(num_etudiant=NumEtud)
+                etud.save()
+                
             context = {
                 'action_url':reverse('calendrier15'),
             }
