@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.shortcuts import HttpResponse
 from django.urls import reverse
 
@@ -10,8 +10,7 @@ admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas uti
 
 # Données simulées pour les réservations (à remplacer par des données de la base de données)
 reservations = [
-    {'date': '2025-01-24', 'time': '09:00', 'student': 'E12345'},
-    {'date': '2025-01-25', 'time': '10:00', 'student': 'E67890'},
+    {'date': '2025-01-24', 'time': '10:00', 'student': 'E12345'},
 ]
 
 # Données simulées pour les créneaux bloqués (à remplacer par des données de la base de données)
@@ -29,16 +28,20 @@ def adminLogin(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        if username == admin_username and password == admin_password:
-            # Redirection vers le tableau de bord de l'admin
+        
+        # Vérification des identifiants (simplifiée pour l'exemple)
+        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
+            # Redirection vers la vue acceuilAdmin après une connexion réussie
             return redirect('acceuilAdmin')
         else:
+            # Si les identifiants sont incorrects, afficher un message d'erreur
             context = {
                 'title': 'Connexion Admin',
                 'error': 'Identifiants incorrects',
             }
             return render(request, 'adminLogin.html', context)
     else:
+        # Si la méthode est GET, afficher le formulaire de connexion
         context = {
             'title': 'Connexion Admin',
         }
