@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h2 {
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.back-button,
+.block-button,
+.profile-button {
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.back-button {
+    background-color: #4CAF50;
+}
+
+.back-button:hover {
+    background-color: #45a049;
+}
+
+.block-button {
+    background-color: #ff4444;
+    margin-bottom: 20px;
+}
+
+.block-button:hover {
+    background-color: #cc0000;
+}
+
+.profile-button {
+    background-color: #2196F3;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.profile-button:hover {
+    background-color: #1976D2;
+}
+
+.blocked {
+    color: red;
+    font-weight: bold;
+}
+
+/* Exemples de classes pour les créneaux */
+.time-slot {
+    cursor: pointer;
+}
+
+.time-slot.reserved {
+    background-color: #ffcccc;
+}
+
+.time-slot.blocked {
+    background-color: #cccccc;
+}
+
+.time-slot.selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.time-slot.booked {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

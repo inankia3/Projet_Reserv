@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<h2>Réservation de Box</h2>
+<p>Bienvenue sur le site de réservation de box silencieuses.</p>
+
+<a href="{% url 'idEtudiant' %}">
+    <button>Étudiant</button>
+</a>
+
+<a href="{% url 'adminLogin' %}">
+    <button>Admin</button>
+</a>
+{% endblock %}
