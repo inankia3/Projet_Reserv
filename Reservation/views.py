@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.shortcuts import HttpResponse
 from django.urls import reverse
 from .models import *
@@ -170,30 +170,6 @@ def adminLogin(request):
         return render(request, 'adminLogin.html', context)
     
 
-# Vue pour la connexion de l'admin
-def adminLogin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        # Vérification des identifiants (simplifiée pour l'exemple)
-        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
-            # Redirection vers la vue acceuilAdmin après une connexion réussie
-            return redirect('accueilAdmin')
-        else:
-            # Si les identifiants sont incorrects, afficher un message d'erreur
-            context = {
-                'title': 'Connexion Admin',
-                'error': 'Identifiants incorrects',
-            }
-            return render(request, 'adminLogin.html', context)
-    else:
-        # Si la méthode est GET, afficher le formulaire de connexion
-        context = {
-            'title': 'Connexion Admin',
-        }
-        return render(request, 'adminLogin.html', context)
-
 def accueilAdmin(request):
     '''if request.method == 'POST':
         # Gérer la soumission du formulaire pour bloquer un créneau
@@ -217,3 +193,15 @@ def profilAdmin(request):
         'reservations_today': reservations_today,
     }
     return render(request, 'profilAdmin.html', context)
+
+def toggleBlockStudent(request, student_number):
+    # Trouver l'étudiant dans la liste simulée
+    student = next((s for s in students if s['student_number'] == student_number), None)
+    if not student:
+        return HttpResponse("Étudiant non trouvé", status=404)
+
+    # Inverser l'état de blocage de l'étudiant
+    student['blocked'] = not student['blocked']
+
+    # Rediriger vers le profil de l'étudiant
+    return redirect('profilEtudiant', student_number=student_number)

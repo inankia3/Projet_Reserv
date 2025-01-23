@@ -45,7 +45,7 @@
     <h2>Gestion des réservations - Admin</h2>
     
     <!-- Bouton profil admin -->
-    <button class="profile-button" onclick="goToAdminProfile()">
+    <button class="profile-button" onclick="goToProfilAdmin()">
         Profil Admin
     </button>
 
@@ -245,8 +245,8 @@
             weekSelector.dispatchEvent(new Event('change')); // Générer les créneaux pour la première semaine par défaut
         });
 
-        function goToAdminProfile() {
-            window.location.href = "/adminProfile"; // Rediriger vers la page du profil de l'admin
+        function goToProfilAdmin() {
+            window.location.href = "/profilAdmin"; // Rediriger vers la page du profil de l'admin
         }
     </script>
 </body>
