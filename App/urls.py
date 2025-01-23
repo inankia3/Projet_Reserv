@@ -29,7 +29,8 @@ urlpatterns = [
     path('adminLogin/',views.adminLogin,name='adminLogin'),
     path('accueilAdmin/',views.accueilAdmin,name='accueilAdmin'),
     path('Reservation/',views.index,name='index'),
-        path('profilAdmin/',views.profilAdmin,name='profilAdmin'),
+    path('profilAdmin/',views.profilAdmin,name='profilAdmin'),
     path('profilEtudiant/<str:student_number>/', views.profilEtudiant, name='profilEtudiant'),
     path('toggleBlockStudent/<str:student_number>/', views.toggleBlockStudent, name='toggleBlockStudent'),
-]
+
+    ]

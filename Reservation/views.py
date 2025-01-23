@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect,  get_object_or_404
 from django.shortcuts import HttpResponse
 from django.urls import reverse
 from .models import *
-from datetime import date
+from datetime import date, datetime, timedelta
 '''
 from django.http import JsonResponse
 
@@ -69,37 +69,15 @@ def accueilEtud(request):
                 etud.save()
             global idEtud
             idEtud=idetud
+            creneaux=Creneau.objects.all()
+            reservations=Reservation.objects.all()
             context = {
                 'action_url':reverse('calendrier15'),
-                'student_number':NumEtud
+                'student_number':NumEtud,
+                'creneaux':creneaux,
+                'reservations':reservations,
             }
             return render(request,'calendrier.html',context)
-            '''            #MODIF
-            creneaux = Creneau.objects.all()
-            grouped_creneaux = {}
-
-        for creneau in creneaux:
-            heure_debut = creneau.heure_debut.strftime('%H:%M:00')
-            heure_fin = creneau.heure_fin.strftime('%H:%M:00')
-            if heure_debut.endswith(':00:00'):
-                grouped_creneaux[heure_debut] = []
-
-            grouped_creneaux[heure_debut].append({
-                'heure_debut': heure_debut,
-                'heure_fin':creneau.heure_debut.strftime('%H:00:00')
-            })
-
-            grouped_creneaux_json = json.dumps(grouped_creneaux, cls=DjangoJSONEncoder)
-            print("test1",grouped_creneaux)
-
-            print("test",grouped_creneaux_json)
-            context = {
-                'action_url':reverse('calendrier15'),
-                'grouped_creneaux':  grouped_creneaux_json,
-            }
-            #return render(request, 'calendrier.html', context)
-            
-            #ajout de l'étudiant dans la base de donnée'''
 
     else:
         context = {
@@ -109,14 +87,34 @@ def accueilEtud(request):
         }
         return render(request,'formEtudiant.html',context)
 
+
 def calendrier15(request):
     if(request.method=='POST'):
-        creneau=request.POST.get('selected_slot')
-        #context = {
-        #    'action_url':reverse('validation'),
-        #}
-        #return render(request,'calendrier15.html',context)
-        return render(request,'calendrier15.html')
+        creneau_str=request.POST.get('selected_slot')
+        date_str,heure_str=creneau_str.split()
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+        heure_obj = datetime.strptime(heure_str, "%H:%M").time()
+        print('creneau',creneau_str)
+        print(f"Date : {date_obj}")
+        print(f"Heure : {heure_obj}")
+        debut_heure = heure_obj
+        fin_heure = (datetime.combine(datetime.min, heure_obj) + timedelta(hours=1)).time()
+
+
+        creneaux_15_min_ids = Creneau.objects.filter(heure_debut__gte=debut_heure, heure_debut__lt=fin_heure).values_list('id', flat=True)
+        creneaux_15 = {Creneau.objects.get(id=creneau_id) for creneau_id in creneaux_15_min_ids}
+        reservations = Reservation.objects.filter(creneau__in=creneaux_15_min_ids, date_field=date_obj)
+        time_slots = [Creneau.objects.get(id=creneau_id).heure_debut.strftime('%H:%M') for creneau_id in creneaux_15_min_ids]
+        booked_slots = [reservation.creneau.heure_debut.strftime('%H:%M') for reservation in reservations]
+
+        context = {
+            'creneaux_15_min': creneaux_15_min_ids,
+            'date': date_obj,
+            'heure': heure_str,
+            'time_slots': time_slots,
+            'booked_slots': booked_slots,
+         }
+        return render(request, 'calendrier15.html', context)
 
 
 # Nouvelle vue pour le profil de l'étudiant
@@ -164,30 +162,6 @@ def adminLogin(request):
         return render(request, 'adminLogin.html', context)
     
 
-# Vue pour la connexion de l'admin
-def adminLogin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        # Vérification des identifiants (simplifiée pour l'exemple)
-        if username == 'admin' and password == 'admin123':  # À remplacer par une vérification sécurisée en production
-            # Redirection vers la vue acceuilAdmin après une connexion réussie
-            return redirect('accueilAdmin')
-        else:
-            # Si les identifiants sont incorrects, afficher un message d'erreur
-            context = {
-                'title': 'Connexion Admin',
-                'error': 'Identifiants incorrects',
-            }
-            return render(request, 'adminLogin.html', context)
-    else:
-        # Si la méthode est GET, afficher le formulaire de connexion
-        context = {
-            'title': 'Connexion Admin',
-        }
-        return render(request, 'adminLogin.html', context)
-
 def accueilAdmin(request):
     '''if request.method == 'POST':
         # Gérer la soumission du formulaire pour bloquer un créneau
@@ -227,3 +201,7 @@ def toggleBlockStudent(request, student_number):
 
     # Rediriger vers le profil de l'étudiant
     return redirect('profilEtudiant', student_number=student_number)
+
+
+
+

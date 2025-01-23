@@ -36,8 +36,9 @@
                     <th>Créneau</th>
                 </tr>
             </thead>
+            
             <tbody id="timeSlotsTable">
-                <!-- Les créneaux de 15 minutes seront générés ici par JavaScript -->
+
             </tbody>
         </table>
         <input type="hidden" name="selected_slot" id="selectedSlot">
@@ -54,17 +55,16 @@
             const timeSlots = JSON.parse('{{ time_slots|safe }}');
             const bookedSlots = JSON.parse('{{ booked_slots|safe }}');
 
-
             // Générer dynamiquement les créneaux horaires de 15 minutes
             timeSlots.forEach(slotTime => {
                 const row = document.createElement('tr');
                 const slotCell = document.createElement('td');
                 slotCell.classList.add('time-slot');
-                slotCell.setAttribute('data-time', slotTime);
-                slotCell.textContent = slotTime;
+                slotCell.setAttribute('data-time', slotTime.heure_debut);
+                slotCell.textContent = slotTime.heure_debut+"-"+slotTime.heure_fin;
 
                 if (bookedSlots.includes(slotTime)) {
-                    slotCell.classList.add('booked');
+                    slotCell.classList.add('reserved');
                     slotCell.style.cursor = 'not-allowed';
                 } else {
                     slotCell.addEventListener('click', function() {
