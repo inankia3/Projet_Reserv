@@ -3,12 +3,7 @@ from django.shortcuts import HttpResponse
 from django.urls import reverse
 from .models import *
 from datetime import date, datetime, timedelta
-'''
-from django.http import JsonResponse
 
-from django.core.serializers.json import DjangoJSONEncoder
-import json
-'''
 # Create your views here.
 NumEtud=''
 admin_username = 'admin'
@@ -89,32 +84,6 @@ def accueilEtud(request):
 
 
 def calendrier15(request):
-    '''    if(request.method=='POST'):
-        creneau_str=request.POST.get('selected_slot')
-        date_str,heure_str=creneau_str.split()
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-        heure_obj = datetime.strptime(heure_str, "%H:%M").time()
-        print('creneau',creneau_str)
-        print(f"Date : {date_obj}")
-        print(f"Heure : {heure_obj}")
-        debut_heure = heure_obj
-        fin_heure = (datetime.combine(datetime.min, heure_obj) + timedelta(hours=1)).time()
-
-
-        creneaux_15_min_ids = Creneau.objects.filter(heure_debut__gte=debut_heure, heure_debut__lt=fin_heure).values_list('id', flat=True)
-        creneaux_15 = {Creneau.objects.get(id=creneau_id) for creneau_id in creneaux_15_min_ids}
-        reservations = Reservation.objects.filter(creneau__in=creneaux_15_min_ids, date_field=date_obj)
-        time_slots = [Creneau.objects.get(id=creneau_id).heure_debut.strftime('%H:%M') for creneau_id in creneaux_15_min_ids]
-        booked_slots = [reservation.creneau.heure_debut.strftime('%H:%M') for reservation in reservations]
-
-        context = {
-            'creneaux_15_min': creneaux_15,
-            'date': date_obj,
-            'heure': heure_str,
-            'time_slots': time_slots,
-            'booked_slots': booked_slots,
-         }
-        return render(request, 'calendrier15.html', context)'''
 
     if request.method == 'POST':
         creneau_str = request.POST.get('selected_slot')
@@ -196,13 +165,6 @@ def adminLogin(request):
     
 
 def accueilAdmin(request):
-    '''if request.method == 'POST':
-        # Gérer la soumission du formulaire pour bloquer un créneau
-        selected_slot = request.POST.get('selected_slot')
-        if selected_slot:
-            date, time = selected_slot.split(' ')
-            blocked_slots.append({'date': date, 'time': time})
-    '''
     context = {
         'title': 'Gestion des réservations - Admin',
         #'reservations': reservations,
