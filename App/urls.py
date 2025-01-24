@@ -10,6 +10,7 @@ urlpatterns = [
     path('idEtudiant/', views.idEtudiant, name='idEtudiant'),
     path('codeEtud/', views.codeEtud, name='codeEtud'),
     path('accueilEtud/', views.accueilEtud, name='accueilEtud'),
+    path('vueCalendrier/', views.vueCalendrier, name='vueCalendrier'),
     path('calendrier15/', views.calendrier15, name='calendrier15'),
     path('calendrier1h_to_15/', views.calendrier1h_to_15, name='calendrier1h_to_15'),
     path('profilEtudiant/<str:student_number>/', views.profilEtudiant, name='profilEtudiant'),

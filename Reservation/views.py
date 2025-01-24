@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 import datetime
 
@@ -96,6 +96,27 @@ def accueilEtud(request):
             'action_url': reverse('accueilEtud'),
         }
         return render(request, 'formEtudiant.html', context)
+    
+def vueCalendrier(request):
+    """
+    Affiche directement la page calendrier.html (sans demander le code).
+    On peut y ajouter un contrôle d'accès si nécessaire.
+    """
+    # Contrôle d'accès minimal : vérifier que l'utilisateur est un étudiant connecté ou un admin
+    if not request.session.get('NumEtud') and not request.session.get('is_admin'):
+        # Ni étudiant (session) ni admin => on redirige vers un endroit logique
+        return redirect('index')
+
+    # Passer le student_number si c'est un étudiant
+    student_number = request.session.get('NumEtud')
+
+    # Dans 'calendrier.html', vous avez <form action="{{ action_url }}">
+    # => On peut définir action_url, par ex. la vue "calendrier1h_to_15"
+    context = {
+        'student_number': student_number,
+        'action_url': reverse('calendrier1h_to_15'),
+    }
+    return render(request, 'calendrier.html', context)
 
 
 def calendrier1h_to_15(request):
@@ -141,10 +162,8 @@ def calendrier15(request):
         # Construire datetime pour début et fin
         dt_format = "%Y-%m-%d %H:%M"
         dt_debut_str = f"{date_str} {start_str}"
-        dt_fin_str   = f"{date_str} {end_str}"
 
         dt_debut = datetime.datetime.strptime(dt_debut_str, dt_format)
-        dt_fin   = datetime.datetime.strptime(dt_fin_str, dt_format)
 
         # Créer la réservation (ex: on suppose un modèle Reservation avec date_reservation, heure_debut, heure_fin, etc.)
         etudiant = Etudiant.objects.get(num_etudiant=student_number)
@@ -248,23 +267,33 @@ def adminLogin(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+
+        # Récupérer le compte admin
         admin_user = Admin.objects.filter(identifiant=username).first()
 
-        if admin_user and check_password(password, admin_user.mdp):
-            # Connexion réussie : on met un flag dans la session
-            request.session['is_admin'] = True
-            return redirect('accueilAdmin')
+        if admin_user:
+            # Vérifier le mot de passe haché
+            if password == admin_user.mdp:
+                # Succès : on stocke is_admin = True en session
+                request.session['is_admin'] = True
+                # Redirection vers la page d'accueil admin (ou une autre)
+                return redirect('accueilAdmin')
+            else:
+                # Mauvais mot de passe
+                context = {
+                    'error': 'Mot de passe incorrect.',
+                }
+                return render(request, 'adminLogin.html', context)
         else:
+            # Identifiant inconnu
             context = {
-                'title': 'Connexion Admin',
-                'error': 'Identifiants incorrects',
+                'error': 'Cet identifiant admin est inconnu.',
             }
             return render(request, 'adminLogin.html', context)
+
     else:
-        context = {
-            'title': 'Connexion Admin',
-        }
-        return render(request, 'adminLogin.html', context)
+        # GET : on affiche le formulaire
+        return render(request, 'adminLogin.html')
 
 
 
@@ -272,6 +301,11 @@ def accueilAdmin(request):
     """
     Accueil Admin : par exemple un calendrierAdmin ou un tableau de bord.
     """
+    if not request.session.get('is_admin', False):
+        # Accès refusé
+        return redirect('adminLogin')
+
+    # Sinon, on affiche la page admin
     context = {
         'title': 'Gestion des réservations - Admin',
         'action_url': reverse('accueilAdmin'),

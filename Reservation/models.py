@@ -44,12 +44,9 @@ class Reservation(models.Model):
 
 
 class Admin(models.Model):
-    identifiant = models.CharField(max_length=200)
-    mdp = models.CharField(max_length=200)
+    id = models.AutoField(primary_key=True)
+    identifiant = models.CharField(max_length=200, unique=True)
+    mdp = models.CharField(max_length=200)  # On y stocke le mot de passe haché
 
     class Meta:
-        managed = False
-        db_table = 'Admin'
-
-    def __str__(self):
-        return f"Admin {self.identifiant}"
+        db_table = 'Admin'  # si la table s'appelle Admin en base
