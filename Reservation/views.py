@@ -11,9 +11,64 @@ admin_password = 'admin123'  # Mot de passe simple pour l'exemple, à ne pas
 Admin_=False
 idEtud=0
 def index(request):
-   texte="<h2> Réservation de Box</h2> <br>Bienvenu.e sur le site de réservation de box \"silencieuses\"<br>"
-   texte+=" <a href='/idEtudiant'><button>Etudiant</button></a> <br> <a href='/adminLogin'><button>Admin</button></a>"
-   return HttpResponse(texte)
+    texte = """
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
+            body {
+                font-family: 'Roboto', sans-serif;
+                background-color: #f4f4f4;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }
+            header {
+                text-align: center;
+                padding: 10px 0;
+            }
+            h1 {
+                background: linear-gradient(90deg, #BF1E2E, #00529B);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-size: 3em;
+                margin: 0;
+                padding: 10px 0;
+                text-shadow: 2px 2px #333;
+            }
+            h2 {
+                color: #BF1E2E; /* Rouge inspiré par le logo */
+                font-family: 'Roboto', sans-serif;
+            }
+            a {
+                text-decoration: none;
+            }
+            button {
+                background-color: #BF1E2E; /* Rouge inspiré par le logo */
+                color: white;
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 10px 2px;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+            button:hover {
+                background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+            }
+        </style>
+        <header>
+            <h1>Réservation de Box</h1>
+        </header>
+        <h2>Bienvenu.e sur le site de réservation de box "silencieuses"</h2>
+        <br>
+        <a href='/idEtudiant'><button>Etudiant</button></a>
+        <br>
+        <a href='/adminLogin'><button>Admin</button></a>
+    """
+    return HttpResponse(texte)
 
 #vue avec le formulaire pour entrer le code étudiant
 def idEtudiant(request):
