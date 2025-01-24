@@ -2,30 +2,116 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Choix créneau 15 min</title>
+    <title>Calendrier 15 minutes - 2 box</title>
+    <style>
+        .time-slot {
+            cursor: pointer;
+        }
+        .time-slot.reserved {
+            background-color: red;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .time-slot:hover {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        .tables-container {
+            display: flex;
+            gap: 50px; /* espacement entre les 2 tables */
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            border: none;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Choisissez un sous-créneau de 15 minutes</h2>
+    <h2>Choisir un sous-créneau de 15 minutes</h2>
+    <p>Date : {{ date_chosen }}</p>
+    <p>Heure de base : {{ hour_chosen }} - {{ hour_chosen|add:"1:00" }}</p>
 
-<!-- On peut afficher le créneau horaire d'une heure sélectionné -->
-<p>Créneau sélectionné : {{ selected_slot }}</p>
+    <div class="tables-container">
+        <!-- Tableau pour le Box 1 -->
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Box 1</th>
+                </tr>
+                <tr>
+                    <th>Créneau</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cr in sub_creneaux %}
+                <tr>
+                    <td>{{ cr.heure_debut|time:"H:i" }} - {{ cr.heure_fin|time:"H:i" }}</td>
+                    <td>
+                        {% if cr.reserved_for_box1 %}
+                            <!-- Créneau réservé => rouge, non cliquable -->
+                            <span class="time-slot reserved">Réservé</span>
+                        {% else %}
+                            <!-- Lien ou bouton pour réserver ce créneau sur box 1 -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="creneau_id" value="{{ cr.id }}">
+                                <input type="hidden" name="box_id" value="1">
+                                <button type="submit">Réserver</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-<form method="POST">
-    {% csrf_token %}
-    <ul>
-    {% for slot in sub_slots %}
-        <li>
-            <label>
-                <input type="radio" name="final_slot" value="{{ slot }}" required>
-                {{ slot }}
-            </label>
-        </li>
-    {% endfor %}
-    </ul>
-
-    <button type="submit">Valider</button>
-</form>
+        <!-- Tableau pour le Box 2 -->
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Box 2</th>
+                </tr>
+                <tr>
+                    <th>Créneau</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cr in sub_creneaux %}
+                <tr>
+                    <td>{{ cr.heure_debut|time:"H:i" }} - {{ cr.heure_fin|time:"H:i" }}</td>
+                    <td>
+                        {% if cr.reserved_for_box2 %}
+                            <span class="time-slot reserved">Réservé</span>
+                        {% else %}
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="creneau_id" value="{{ cr.id }}">
+                                <input type="hidden" name="box_id" value="2">
+                                <button type="submit">Réserver</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </body>
 </html>

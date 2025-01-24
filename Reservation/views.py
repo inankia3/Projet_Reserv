@@ -136,75 +136,106 @@ def calendrier1h_to_15(request):
 
 def calendrier15(request):
     """
-    Affiche 4 sous-créneaux de 15min pour l'heure choisie.
-    À la validation, on crée la réservation en base
-    puis on redirige vers calendrier.html (ou accueilEtud).
+    - GET : Affiche la page avec 2 tableaux (Box1, Box2) 
+            + colorie en rouge les créneaux réservés 
+            + propose un choix cliquable sur les créneaux libres.
+    - POST : L'utilisateur a choisi un créneau / box => on crée la réservation.
     """
     if request.method == 'POST':
-        # L'utilisateur a choisi un sous-créneau final (ex "13:00-13:15")
-        final_slot = request.POST.get('final_slot')
-        student_number = request.session.get('NumEtud')  # Supposez que vous l'avez en session
-        selected_slot = request.session.get('selected_slot')  # ex "2025-02-10 13:00"
+        # Traitement quand on clique sur "Valider" un sous-créneau
+        chosen_creneau_id = request.POST.get('creneau_id')
+        chosen_box_id = request.POST.get('box_id')
+        date_chosen = request.session.get('selected_date')  # ex "2025-02-10"
+        # Récupération de l'étudiant depuis la session
+        student_number = request.session.get('NumEtud')
 
-        if not (final_slot and student_number and selected_slot):
-            # Mauvais usage, on retourne
+        if not (chosen_creneau_id and chosen_box_id and date_chosen and student_number):
+            # Mauvais usage
             return redirect('accueilEtud')
 
-        # Décomposer final_slot (ex "13:00-13:15")
-        start_str, end_str = final_slot.split('-')  # "13:00" / "13:15"
-        start_str = start_str.strip()
-        end_str = end_str.strip()
-
-        # Décomposer selected_slot (ex "2025-02-10 13:00")
-        date_str, hour_str = selected_slot.split(' ')
-        # date_str = "2025-02-10", hour_str = "13:00"
-
-        # Construire datetime pour début et fin
-        dt_format = "%Y-%m-%d %H:%M"
-        dt_debut_str = f"{date_str} {start_str}"
-
-        dt_debut = datetime.datetime.strptime(dt_debut_str, dt_format)
-
-        # Créer la réservation (ex: on suppose un modèle Reservation avec date_reservation, heure_debut, heure_fin, etc.)
+        # Création de la réservation
         etudiant = Etudiant.objects.get(num_etudiant=student_number)
-
-        # Récupérer l'ID du créneau correspondant à l'heure de début
-        creneau_id = Creneau.objects.get(heure_debut=dt_debut.time())
-
+        creneau_obj = Creneau.objects.get(id=chosen_creneau_id)
+        # On suppose que la table Reservation a un champ date_ (DateField),
+        # creneau (FK), box_id, etc.
         Reservation.objects.create(
             etudiant=etudiant,
-            box_id=1,             # ex. box 1 par défaut
-            admin_field=False,    # champ bool
-            date_field=dt_debut.date(),
-            creneau= creneau_id,
+            box_id=int(chosen_box_id),
+            creneau=creneau_obj,
+            date_field=date_chosen,    # ou date_ selon votre champ
+            admin_field=False
         )
 
-        # Mettre à jour l'étudiant (date_derniere_reserv, etc.)
-        etudiant.date_derniere_reserv = timezone.now()
-        etudiant.save()
-
-        # Rediriger vers calendrier.html ou accueilEtud
-        return redirect('profilEtudiant', student_number=student_number)
+        # Redirection
+        return redirect('vueCalendrier')  # ou accueilEtud, etc.
 
     else:
-        # GET : on affiche la liste des 4 sous-créneaux
-        selected_slot = request.session.get('selected_slot')  # "2025-02-10 13:00"
-        sub_slots = []
-        if selected_slot:
-            # On récupère l'heure
-            _, hour_str = selected_slot.split(' ')  # ex "13:00"
-            base_hour = int(hour_str.split(':')[0])  # 13
-            # exemple : "13:00-13:15", "13:15-13:30", ...
-            sub_slots = [
-                f"{base_hour:02d}:00 - {base_hour:02d}:15",
-                f"{base_hour:02d}:15 - {base_hour:02d}:30",
-                f"{base_hour:02d}:30 - {base_hour:02d}:45",
-                f"{base_hour:02d}:45 - {base_hour+1:02d}:00",
-            ]
+        # --- GET : Affichage des 2 tableaux ---
+        # On récupère la date et l'heure depuis la session
+        date_chosen = request.session.get('selected_date')  # par ex "2025-02-10"
+        hour_chosen = request.session.get('selected_hour')  # par ex "13:00"
+        if not (date_chosen and hour_chosen):
+            # Si pas de sélection, on renvoie
+            return redirect('vueCalendrier')
+
+        # On détermine quels creneaux (table Creneau) correspondent 
+        # aux 4 sous-créneaux de l'heure hour_chosen. 
+        # -> ex: 13:00-13:15, 13:15-13:30, 13:30-13:45, 13:45-14:00
+        # 1) Soit vous avez un code pour filtrer la BDD
+        #    => Si vous avez un champ heure_debut, heure_fin, etc.
+        # 2) Soit vous générez 4 "heures_debut" localement, et vous faites un filter.
+
+        base_hour = int(hour_chosen.split(':')[0])  # ex 13
+        # On construit 4 sous-créneaux => ex: 13:00, 13:15, 13:30, 13:45
+        from datetime import time
+        sub_times = [
+            (time(base_hour,  0), time(base_hour, 15)),  # 13:00 - 13:15
+            (time(base_hour, 15), time(base_hour, 30)),  # 13:15 - 13:30
+            (time(base_hour, 30), time(base_hour, 45)),  # 13:30 - 13:45
+            (time(base_hour, 45), time(base_hour+1, 0)), # 13:45 - 14:00
+        ]
+        # On récupère ces creneaux dans la table Creneau
+        # (ex: SELECT * FROM Creneau WHERE (heure_debut, heure_fin) in (sub_times)).
+        # Selon comment vous stockez, on peut faire un "in" ou on boucle.
+        # Ex. si Creneau a (heure_debut, heure_fin) = (13:00, 13:15) => on matche
+        # On va faire un creneaux_sub = []
+        creneaux_sub = []
+        for (start, end) in sub_times:
+            cr = Creneau.objects.filter(heure_debut=start, heure_fin=end).first()
+            if cr:
+                creneaux_sub.append(cr)
+
+        # creneaux_sub est la liste des 4 creneaux (objets)
+        # On check dans Reservation si c'est déjà pris pour date_chosen et box=1 ou 2
+        reserved_box1 = set()
+        reserved_box2 = set()
+        # On récupère toutes les réservations pour la date et creneau__in creneaux_sub
+        reservations = Reservation.objects.filter(
+            date_field=date_chosen,
+            creneau__in=creneaux_sub
+        )
+        # On remplit un set() avec creneau_id
+        for r in reservations:
+            if r.box_id == 1:
+                reserved_box1.add(r.creneau_id)
+            elif r.box_id == 2:
+                reserved_box2.add(r.creneau_id)
+
+        # On prépare la liste sub_creneaux avec info "reserved_box1" / "reserved_box2"
+        sub_creneaux = []
+        for c in creneaux_sub:
+            sub_creneaux.append({
+                'id': c.id,
+                'heure_debut': c.heure_debut,
+                'heure_fin': c.heure_fin,
+                'reserved_for_box1': (c.id in reserved_box1),
+                'reserved_for_box2': (c.id in reserved_box2),
+            })
 
         context = {
-            'sub_slots': sub_slots,
-            'selected_slot': selected_slot,
+            'date_chosen': date_chosen,
+            'hour_chosen': hour_chosen,
+            'sub_creneaux': sub_creneaux,
         }
         return render(request, 'calendrier15.html', context)
 
