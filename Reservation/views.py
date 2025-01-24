@@ -26,15 +26,12 @@ def index(request):
                 text-align: center;
                 padding: 10px 0;
             }
-            h1 {
-                background: linear-gradient(90deg, #BF1E2E, #00529B);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                font-size: 3em;
-                margin: 0;
-                padding: 10px 0;
-                text-shadow: 2px 2px #333;
-            }
+        h1 {
+
+            font-size: 2em; 
+            margin: 0;
+            padding: 10px 0;
+        }
             h2 {
                 color: #BF1E2E; /* Rouge inspiré par le logo */
                 font-family: 'Roboto', sans-serif;
@@ -229,15 +226,15 @@ def accueilAdmin(request):
     return render(request, 'calendrierAdmin.html', context)
 
 def profilAdmin(request):
-    students=Etudiant.objects.all()
-    reservation_jour=Reservation.objects.filter(date_field=date.today())
+    students = Etudiant.objects.all()
+    reservations_today = Reservation.objects.filter(date_field=date.today())
+
     context = {
         'title': 'Profil Admin',
         'students': students,
-        'reservations_today': reservation_jour,
+        'reservations_today': reservations_today,
     }
     return render(request, 'profilAdmin.html', context)
-
 
 def toggleBlockStudent(request, student_number):
     students=Etudiant.objects.all()

@@ -1,12 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
     <title>Réservation de salle - Détail</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        h2 {
+            font-size: 2em;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        main {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .box-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #BF1E2E; /* Rouge inspiré par le logo */
+        }
+
+        select, input[type="text"], input[type="submit"], button {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        input[type="submit"], button {
+            background-color: #BF1E2E; /* Rouge inspiré par le logo */
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         th, td {
             border: 1px solid #ccc;
             text-align: center;
@@ -14,61 +81,85 @@
         }
         .time-slot {
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
+        .time-slot.selected {
+            background-color: #d4edda; /* Vert pâle */
+            font-weight: bold;
+        }
+
         .time-slot.reserved {
             background-color: #ff4d4d; /* Rouge */
             cursor: not-allowed;
         }
-        .time-slot.selected {
-            background-color: #4CAF50;
+
+        .back-button {
+            padding: 10px 20px;
+            background-color: #BF1E2E; /* Rouge inspiré par le logo */
             color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
         }
     </style>
 </head>
 <body>
-    <h2>Réserver un créneau de 15 minutes</h2>
+    <h2>Réserver un créneau de 15 minutes le {{date|date:"l d F Y"}}</h2>
     <form id="reservationDetailForm" method="POST">
         {% csrf_token %}
 
-        <h3>Box 1</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Créneau</th>
-                </tr>
-            </thead>
-            <tbody id="timeSlotsTable1">
-                {% for creneau in time_slots %}
+        <div class="box-container">
+            <h3>Box 1</h3>
+            <table>
+                <thead>
                     <tr>
-                        <td class="time-slot {% if creneau.heure_debut in booked_slots1 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
-                            {{ creneau.heure_debut }}
-                        </td>
+                        <th>Créneau</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="timeSlotsTable1">
+                    {% for creneau in time_slots %}
+                        <tr>
+                            <td class="time-slot {% if creneau.heure_debut in booked_slots1 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                                {{ creneau.heure_debut }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <h3>Box 2</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Créneau</th>
-                </tr>
-            </thead>
-            <tbody id="timeSlotsTable2">
-                {% for creneau in time_slots %}
+        <div class="box-container">
+            <h3>Box 2</h3>
+            <table>
+                <thead>
                     <tr>
-                        <td class="time-slot {% if creneau.heure_debut in booked_slots2 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
-                            {{ creneau.heure_debut }}
-                        </td>
+                        <th>Créneau</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="timeSlotsTable2">
+                    {% for creneau in time_slots %}
+                        <tr>
+                            <td class="time-slot {% if creneau.heure_debut in booked_slots2 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                                {{ creneau.heure_debut }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <input type="hidden" name="selected_slot" id="selectedSlot">
+        <br>
         <button type="submit">Valider la sélection</button>
     </form>
+    <a href="javascript:history.back()" class="back-button">Retour</a>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

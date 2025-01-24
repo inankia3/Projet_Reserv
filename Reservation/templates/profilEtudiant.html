@@ -1,40 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
     <title>Profil Étudiant</title>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h2 {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
             color: #333;
+            margin: 20px;
+            padding: 20px;
         }
+
+        h2 {
+            color: #BF1E2E; /* Rouge inspiré par le logo */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+
         th, td {
             border: 1px solid #ccc;
             padding: 10px;
             text-align: left;
         }
+
         th {
             background-color: #f4f4f4;
         }
+
         .section {
             margin-bottom: 40px;
         }
+
         .back-button {
             padding: 10px 20px;
-            background-color: #4CAF50;
+            background-color: #BF1E2E; /* Rouge inspiré par le logo */
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            display: inline-block;
         }
+
         .back-button:hover {
-            background-color: #45a049;
+            background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+        }
+
+        .date-column {
+            width: 40%;
+        }
+
+        .creneau-column {
+            width: 40%;
+        }
+
+        .box-column {
+            width: 20%;
         }
     </style>
 </head>
@@ -47,20 +76,22 @@
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Créneau</th>
+                    <th class="date-column">Date</th>
+                    <th class="creneau-column">Créneau</th>
+                    <th class="box-column">Box</th>
                 </tr>
             </thead>
             <tbody>
                 {% for reservation in reservations_a_venir %}
                 <tr>
-                    <td>{{ reservation.date_field }}</td>
-                    <td>{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
+                    <td class="date-column">{{ reservation.date_field|date:"l, d F Y" }}</td>
+                    <td class="creneau-column">{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
+                    <td class="box-column">{{ reservation.box_id }}</td>
                 </tr>
                 {% endfor %}
                 {% if reservations_a_venir|length == 0 %}
                 <tr>
-                    <td colspan="2">Aucune réservation à venir.</td>
+                    <td colspan="3">Aucune réservation à venir.</td>
                 </tr>
                 {% endif %}
             </tbody>
@@ -72,20 +103,22 @@
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Créneau</th>
+                    <th class="date-column">Date</th>
+                    <th class="creneau-column">Créneau</th>
+                    <th class="box-column">Box</th>
                 </tr>
             </thead>
             <tbody>
                 {% for reservation in reservations_passees %}
                 <tr>
-                    <td>{{ reservation.date_field }}</td>
-                    <td>{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
+                    <td class="date-column">{{ reservation.date_field|date:"l, d F Y" }}</td>
+                    <td class="creneau-column">{{ reservation.creneau.heure_debut|date:"H:i" }} - {{ reservation.creneau.heure_fin|date:"H:i" }}</td>
+                    <td class="box-column">{{ reservation.box_id }}</td>
                 </tr>
                 {% endfor %}
                 {% if reservations_passees|length == 0 %}
                 <tr>
-                    <td colspan="2">Aucune réservation passée.</td>
+                    <td colspan="3">Aucune réservation passée.</td>
                 </tr>
                 {% endif %}
             </tbody>
