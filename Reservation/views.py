@@ -293,9 +293,10 @@ def profilAdmin(request):
     context = {
         'title': 'Profil Admin',
         'students': students,
-        'reservations_today': reservations_today,
+        'reservations_today': reservation_jour,
     }
     return render(request, 'profilAdmin.html', context)
+
 
 
 def toggleBlockStudent(request, student_number):
