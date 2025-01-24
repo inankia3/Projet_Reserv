@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>{{title}}</title>
-</head>
-<body>
-    Erreur : {{error}}
-    <form method="POST" action="{{action_url}}">
-        {% csrf_token %}
-        Retour à l'accueil
-        <input type="submit" value="Valider">
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<p style="color: red;">Erreur : {{ error }}</p>
+<form method="POST" action="{{ action_url }}">
+    {% csrf_token %}
+    <button type="submit">Retour à l'accueil</button>
+</form>
+{% endblock %}

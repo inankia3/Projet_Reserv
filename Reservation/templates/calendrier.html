@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Réservation de salle</title>
+    <meta charset="UTF-8">
+    <title>Réserver un créneau</title>
+    <!-- Exemple d'inclusion d'un fichier CSS et JS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/calendrier.js' %}"></script>
+
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
         th, td {
             border: 1px solid #ccc;
@@ -17,7 +31,7 @@
         }
         .time-slot.selected {
             background-color: #4CAF50;
-            color: white;
+            color: #fff;
         }
         .profile-button {
             position: absolute;
@@ -33,138 +47,68 @@
         .profile-button:hover {
             background-color: #1976D2;
         }
+        label {
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        select {
+            padding: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50; /* actif */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        /* Style quand le bouton est disabled */
+        button:disabled {
+            background-color: #ccc; /* grisé */
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
+
     <h2>Réserver un créneau</h2>
     
-    <!-- Bouton profil -->
-    <button class="profile-button" onclick="goToProfilePage()">
-        Profil (Numéro étudiant: {{ student_number }})
-    </button>
+    {% if student_number %}
+        <button class="profile-button" onclick="goToProfilePage('{{ student_number }}')">
+            Profil (Étudiant n°{{ student_number }})
+        </button>
+    {% else %}
+        <p style="color: red; font-weight: bold;">
+            Attention : Aucun numéro étudiant trouvé !
+        </p>
+    {% endif %}
 
-    <form id="reservationForm" method="POST" action="{{ action_url }}">
+    <form id="reservationForm" method="POST" action="/calendrier1h_to_15/">
         {% csrf_token %}
 
+        <!-- Sélecteur de semaine, tableau de créneaux etc. -->
         <label for="weekSelector">Sélectionner une semaine :</label>
-        <select id="weekSelector">
-            <!-- Les options pour les semaines seront générées par JavaScript -->
-        </select>
+        <select id="weekSelector"></select>
 
         <table>
             <thead>
-                <tr id="daysHeader">
-                    <!-- Les en-têtes des jours seront générées ici par JavaScript -->
-                </tr>
+                <tr id="daysHeader"></tr>
             </thead>
-            <tbody id="timeSlotsTable">
-                <!-- Les créneaux horaires seront générés ici par JavaScript -->
-            </tbody>
+            <tbody id="timeSlotsTable"></tbody>
         </table>
+
+        <!-- Champ caché pour le créneau sélectionné -->
         <input type="hidden" name="selected_slot" id="selectedSlot">
-        <button type="submit">Valider la sélection</button>
+
+        <!-- Bouton désactivé par défaut -->
+        <button id="validateBtn" type="submit" disabled>Valider la sélection</button>
     </form>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const timeSlotsTable = document.getElementById('timeSlotsTable');
-            const selectedSlotInput = document.getElementById('selectedSlot');
-            const weekSelector = document.getElementById('weekSelector');
-            const daysHeader = document.getElementById('daysHeader');
-            let selectedSlot = null;
-
-            // Générer dynamiquement les options du sélecteur de semaine
-            function generateWeekOptions() {
-                const currentDate = new Date();
-                const currentDay = currentDate.getDay();
-                const daysUntilMonday = (currentDay + 6) % 7;
-                currentDate.setDate(currentDate.getDate() - daysUntilMonday); // Se déplacer au lundi de la semaine actuelle
-
-                for (let i = 0; i <= 5; i++) {
-                    const option = document.createElement('option');
-                    const startOfWeek = new Date(currentDate);
-                    startOfWeek.setDate(startOfWeek.getDate() + i * 7);
-                    const endOfWeek = new Date(startOfWeek);
-                    endOfWeek.setDate(endOfWeek.getDate() + 4); // Jusqu'à vendredi
-
-                    const startStr = `${startOfWeek.getDate()} ${startOfWeek.toLocaleString('default', { month: 'short' })} ${startOfWeek.getFullYear()}`;
-                    const endStr = `${endOfWeek.getDate()} ${endOfWeek.toLocaleString('default', { month: 'short' })} ${endOfWeek.getFullYear()}`;
-                    option.value = startOfWeek.toISOString().split('T')[0];
-                    option.textContent = `${startStr} - ${endStr}`;
-                    weekSelector.appendChild(option);
-                }
-            }
-
-            // Générer dynamiquement les en-têtes de jours avec dates
-            function generateDaysHeader(weekStart) {
-                daysHeader.innerHTML = '';
-                const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-                for (let i = 0; i < days.length; i++) {
-                    const th = document.createElement('th');
-                    const currentDate = new Date(weekStart);
-                    currentDate.setDate(currentDate.getDate() + i);
-                    const dateStr = `${days[i]} ${currentDate.getDate()} ${currentDate.toLocaleString('default', { month: 'long' })}`;
-                    th.textContent = dateStr;
-                    daysHeader.appendChild(th);
-                }
-            }
-
-            // Générer dynamiquement les créneaux horaires
-            function generateTimeSlots(weekStart) {
-                timeSlotsTable.innerHTML = '';
-                const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-                for (let i = 9; i <= 17; i++) {
-                    const row = document.createElement('tr');
-                    days.forEach((day, index) => {
-                        const slotCell = document.createElement('td');
-                        const currentDate = new Date(weekStart);
-                        currentDate.setDate(currentDate.getDate() + index);
-                        slotCell.classList.add('time-slot');
-                        slotCell.setAttribute('data-time', `${i}:00`);
-                        slotCell.setAttribute('data-day', day);
-                        slotCell.setAttribute('data-date', currentDate.toISOString().split('T')[0]);
-                        slotCell.textContent = `${i}:00`;
-                        row.appendChild(slotCell);
-                    });
-                    timeSlotsTable.appendChild(row);
-                }
-            }
-
-            // Gérer la sélection des créneaux horaires
-            function handleTimeSlotSelection() {
-                const timeSlots = document.querySelectorAll('.time-slot');
-                timeSlots.forEach(slot => {
-                    slot.addEventListener('click', function() {
-                        if (selectedSlot) {
-                            selectedSlot.classList.remove('selected');
-                        }
-                        selectedSlot = slot;
-                        slot.classList.add('selected');
-                        updateSelectedSlot();
-                    });
-                });
-            }
-
-            function updateSelectedSlot() {
-                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-date') + ' ' + selectedSlot.getAttribute('data-time') : '';
-            }
-
-            // Générer les créneaux horaires pour la semaine sélectionnée
-            weekSelector.addEventListener('change', function() {
-                const selectedWeekStart = new Date(weekSelector.value);
-                generateDaysHeader(selectedWeekStart);
-                generateTimeSlots(selectedWeekStart);
-                handleTimeSlotSelection();
-            });
-
-            // Initialiser les options de semaine et les créneaux horaires
-            generateWeekOptions();
-            weekSelector.dispatchEvent(new Event('change')); // Générer les créneaux pour la première semaine par défaut
-        });
-
-        function goToProfilePage() {
-            window.location.href = "/profilEtudiant"; // Rediriger vers la page du profil de l'étudiant
-        }
-    </script>
 </body>
 </html>

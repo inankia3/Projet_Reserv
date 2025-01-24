@@ -1,117 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Profil Étudiant</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .section {
-            margin-bottom: 40px;
-        }
-        .back-button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .back-button:hover {
-            background-color: #45a049;
-        }
-        .block-button {
-            padding: 10px 20px;
-            background-color: #ff4444;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .block-button:hover {
-            background-color: #cc0000;
-        }
-    </style>
-</head>
-<body>
-    <h2>Profil Étudiant</h2>
-    <p><strong>Numéro étudiant :</strong> {{ student.student_number }}</p>
-    <p><strong>Statut :</strong> {% if student.blocked %}Bloqué{% else %}Actif{% endif %}</p>
+{% extends 'base.html' %}
+{% block title %}Profil Étudiant{% endblock %}
 
-    <!-- Bouton pour bloquer/débloquer l'étudiant (visible uniquement pour l'admin) -->
-    <form action="{% url 'toggleBlockStudent' student.student_number %}" method="post" style="margin-bottom: 20px;">
+{% block content %}
+<h2>Profil Étudiant</h2>
+<p><strong>Numéro étudiant :</strong> {{ student.num_etudiant }}</p>
+<p><strong>Statut :</strong> {% if student.autorise %}Actif{% else %}Bloqué{% endif %}</p>
+
+<!-- Bouton bloquer/débloquer l'étudiant -->
+{% if is_admin %}
+    <form action="{% url 'toggleBlockStudent' student.num_etudiant %}" method="post" style="margin-bottom: 20px;">
         {% csrf_token %}
         <button type="submit" class="block-button">
-            {% if student.blocked %}Débloquer l'étudiant{% else %}Bloquer l'étudiant{% endif %}
+            {% if student.autorise %}Bloquer l'étudiant{% else %}Débloquer l'étudiant{% endif %}
         </button>
     </form>
+{% endif %}
 
-    <div class="section">
-        <h3>Réservations à venir</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Créneau</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reservation in reservations_a_venir %}
-                <tr>
-                    <td>{{ reservation.date }}</td>
-                    <td>{{ reservation.creneau }}</td>
-                </tr>
-                {% endfor %}
-                {% if reservations_a_venir|length == 0 %}
-                <tr>
-                    <td colspan="2">Aucune réservation à venir.</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+<div class="section">
+    <h3>Réservations à venir</h3>
+    {% if reservations_a_venir %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Créneau</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations_a_venir %}
+            <tr>
+                <td>{{ reservation.date_field }}</td>
+                <td>{{ reservation.creneau.heure_debut }} - {{ reservation.creneau.heure_fin }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucune réservation à venir.</p>
+    {% endif %}
+</div>
 
-    <div class="section">
-        <h3>Réservations passées</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Créneau</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reservation in reservations_passees %}
-                <tr>
-                    <td>{{ reservation.date }}</td>
-                    <td>{{ reservation.creneau }}</td>
-                </tr>
-                {% endfor %}
-                {% if reservations_passees|length == 0 %}
-                <tr>
-                    <td colspan="2">Aucune réservation passée.</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+<div class="section">
+    <h3>Réservations passées</h3>
+    {% if reservations_passees %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Créneau</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations_passees %}
+            <tr>
+                <td>{{ reservation.date_field }}</td>
+                <td>{{ reservation.creneau.heure_debut }} - {{ reservation.creneau.heure_fin }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucune réservation passée.</p>
+    {% endif %}
+</div>
 
-    <a href="javascript:history.back()" class="back-button">Retour</a>
-</body>
-</html>
+<a href="javascript:history.back()" class="back-button">Retour</a>
+{% endblock %}
