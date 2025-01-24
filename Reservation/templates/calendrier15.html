@@ -15,8 +15,8 @@
         .time-slot {
             cursor: pointer;
         }
-        .time-slot.booked {
-            background-color: #ccc;
+        .time-slot.reserved {
+            background-color: #ff4d4d; /* Rouge */
             cursor: not-allowed;
         }
         .time-slot.selected {
@@ -27,46 +27,61 @@
 </head>
 <body>
     <h2>Réserver un créneau de 15 minutes</h2>
-    <form id="reservationDetailForm" method="POST"  >
+    <form id="reservationDetailForm" method="POST">
         {% csrf_token %}
 
+        <h3>Box 1</h3>
         <table>
             <thead>
                 <tr>
                     <th>Créneau</th>
                 </tr>
             </thead>
-            
-            <tbody id="timeSlotsTable">
-
+            <tbody id="timeSlotsTable1">
+                {% for creneau in time_slots %}
+                    <tr>
+                        <td class="time-slot {% if creneau.heure_debut in booked_slots1 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                            {{ creneau.heure_debut }}
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
+
+        <h3>Box 2</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Créneau</th>
+                </tr>
+            </thead>
+            <tbody id="timeSlotsTable2">
+                {% for creneau in time_slots %}
+                    <tr>
+                        <td class="time-slot {% if creneau.heure_debut in booked_slots2 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                            {{ creneau.heure_debut }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
         <input type="hidden" name="selected_slot" id="selectedSlot">
         <button type="submit">Valider la sélection</button>
     </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const timeSlotsTable = document.getElementById('timeSlotsTable');
             const selectedSlotInput = document.getElementById('selectedSlot');
             let selectedSlot = null;
 
-            // Les créneaux de 15 minutes et les créneaux réservés sont passés depuis Django
-            const timeSlots = JSON.parse('{{ time_slots|safe }}');
-            const bookedSlots = JSON.parse('{{ booked_slots|safe }}');
+            // Les créneaux sont passés directement depuis Django
+            const timeSlots1 = document.querySelectorAll('#timeSlotsTable1 .time-slot');
+            const timeSlots2 = document.querySelectorAll('#timeSlotsTable2 .time-slot');
 
-            // Générer dynamiquement les créneaux horaires de 15 minutes
-            timeSlots.forEach(slotTime => {
-                const row = document.createElement('tr');
-                const slotCell = document.createElement('td');
-                slotCell.classList.add('time-slot');
-                slotCell.setAttribute('data-time', slotTime.heure_debut);
-                slotCell.textContent = slotTime.heure_debut+"-"+slotTime.heure_fin;
-
-                if (bookedSlots.includes(slotTime)) {
-                    slotCell.classList.add('reserved');
-                    slotCell.style.cursor = 'not-allowed';
-                } else {
+            // Ajoutez les gestionnaires d'événements aux créneaux de Box 1
+            timeSlots1.forEach(slotCell => {
+                if (!slotCell.classList.contains('reserved')) {
                     slotCell.addEventListener('click', function() {
                         if (selectedSlot) {
                             selectedSlot.classList.remove('selected');
@@ -76,9 +91,20 @@
                         updateSelectedSlot();
                     });
                 }
+            });
 
-                row.appendChild(slotCell);
-                timeSlotsTable.appendChild(row);
+            // Ajoutez les gestionnaires d'événements aux créneaux de Box 2
+            timeSlots2.forEach(slotCell => {
+                if (!slotCell.classList.contains('reserved')) {
+                    slotCell.addEventListener('click', function() {
+                        if (selectedSlot) {
+                            selectedSlot.classList.remove('selected');
+                        }
+                        selectedSlot = slotCell;
+                        slotCell.classList.add('selected');
+                        updateSelectedSlot();
+                    });
+                }
             });
 
             function updateSelectedSlot() {
@@ -87,8 +113,13 @@
 
             document.getElementById('reservationDetailForm').addEventListener('submit', function(event) {
                 event.preventDefault();
+                if (!selectedSlot) {
+                    alert('Veuillez sélectionner un créneau.');
+                    return;
+                }
                 alert('Créneau sélectionné : ' + selectedSlotInput.value);
                 // Envoyer les données sélectionnées au serveur si nécessaire
+                this.submit();  // Si nécessaire, soumettez le formulaire
             });
         });
     </script>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Réservation de salle - Détail</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 10px;
+        }
+        .time-slot {
+            cursor: pointer;
+        }
+        .time-slot.booked {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .time-slot.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>Réserver un créneau de 15 minutes</h2>
+    <form id="reservationDetailForm" method="POST"  >
+        {% csrf_token %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Créneau</th>
+                </tr>
+            </thead>
+            
+            <tbody id="timeSlotsTable">
+
+            </tbody>
+        </table>
+        <input type="hidden" name="selected_slot" id="selectedSlot">
+        <button type="submit">Valider la sélection</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeSlotsTable = document.getElementById('timeSlotsTable');
+            const selectedSlotInput = document.getElementById('selectedSlot');
+            let selectedSlot = null;
+
+            // Les créneaux de 15 minutes et les créneaux réservés sont passés depuis Django
+            const timeSlots = JSON.parse("{{ time_slots|safe }}");
+            log(timeSlots);
+            log("{{ time_slots|safe }}");
+            const bookedSlots = JSON.parse('{{ booked_slots|safe }}');
+
+            // Générer dynamiquement les créneaux horaires de 15 minutes
+            timeSlots.forEach(slotTime => {
+                const row = document.createElement('tr');
+                const slotCell = document.createElement('td');
+                slotCell.classList.add('time-slot');
+                slotCell.setAttribute('data-time', slotTime.heure_debut);
+                slotCell.textContent = slotTime.heure_debut+"-"+slotTime.heure_fin;
+
+                if (bookedSlots.includes(slotTime)) {
+                    slotCell.classList.add('reserved');
+                    slotCell.style.cursor = 'not-allowed';
+                } else {
+                    slotCell.addEventListener('click', function() {
+                        if (selectedSlot) {
+                            selectedSlot.classList.remove('selected');
+                        }
+                        selectedSlot = slotCell;
+                        slotCell.classList.add('selected');
+                        updateSelectedSlot();
+                    });
+                }
+
+                row.appendChild(slotCell);
+                timeSlotsTable.appendChild(row);
+            });
+
+            function updateSelectedSlot() {
+                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-time') : '';
+            }
+
+            document.getElementById('reservationDetailForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                alert('Créneau sélectionné : ' + selectedSlotInput.value);
+                // Envoyer les données sélectionnées au serveur si nécessaire
+            });
+        });
+    </script>
+</body>
+</html>

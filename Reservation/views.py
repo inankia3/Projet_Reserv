@@ -89,7 +89,7 @@ def accueilEtud(request):
 
 
 def calendrier15(request):
-    if(request.method=='POST'):
+    '''    if(request.method=='POST'):
         creneau_str=request.POST.get('selected_slot')
         date_str,heure_str=creneau_str.split()
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -108,12 +108,45 @@ def calendrier15(request):
         booked_slots = [reservation.creneau.heure_debut.strftime('%H:%M') for reservation in reservations]
 
         context = {
-            'creneaux_15_min': creneaux_15_min_ids,
+            'creneaux_15_min': creneaux_15,
             'date': date_obj,
             'heure': heure_str,
             'time_slots': time_slots,
             'booked_slots': booked_slots,
          }
+        return render(request, 'calendrier15.html', context)'''
+
+    if request.method == 'POST':
+        creneau_str = request.POST.get('selected_slot')
+        date_str, heure_str = creneau_str.split()
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+        heure_obj = datetime.strptime(heure_str, "%H:%M").time()
+        print('creneau', creneau_str)
+        print(f"Date : {date_obj}")
+        print(f"Heure : {heure_obj}")
+        debut_heure = heure_obj
+        fin_heure = (datetime.combine(datetime.min, heure_obj) + timedelta(hours=1)).time()
+        creneaux_15_min_ids = Creneau.objects.filter(heure_debut__gte=debut_heure, heure_debut__lt=fin_heure).values_list('id', flat=True)
+
+        creneaux_15_min = Creneau.objects.filter(heure_debut__gte=debut_heure, heure_debut__lt=fin_heure)
+        reservations1 = Reservation.objects.filter(creneau__in=creneaux_15_min_ids, date_field=date_obj,box_id=1)
+        reservations2 = Reservation.objects.filter(creneau__in=creneaux_15_min_ids, date_field=date_obj,box_id=2)
+
+
+        # Prepare the formatted time strings
+        time_slots = [{'id': creneau.id, 'heure_debut': creneau.heure_debut.strftime('%H:%M')} for creneau in creneaux_15_min]
+        booked_slots1 = [reservation.creneau.heure_debut.strftime('%H:%M') for reservation in reservations1]
+        booked_slots2 = [reservation.creneau.heure_debut.strftime('%H:%M') for reservation in reservations2]
+        print(booked_slots2)
+        print(booked_slots1)
+        context = {
+            'creneaux_15_min': creneaux_15_min,
+            'date': date_obj,
+            'heure': heure_str,
+            'time_slots': time_slots,
+            'booked_slots1': booked_slots1,
+            'booked_slots2': booked_slots2,
+        }
         return render(request, 'calendrier15.html', context)
 
 
