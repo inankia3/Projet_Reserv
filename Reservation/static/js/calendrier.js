@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timeSlotsTable.innerHTML = '';
         const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 
-        for (let hour = 9; hour <= 17; hour++) {
+        for (let hour = 9; hour <= 16; hour++) {
             const row = document.createElement('tr');
             days.forEach((day, index) => {
                 const slotCell = document.createElement('td');
