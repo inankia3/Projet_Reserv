@@ -135,7 +135,7 @@ def accueilEtud(request):
             creneaux=Creneau.objects.all()
             reservations=Reservation.objects.all()
             context = {
-                'action_url':reverse('calendrier15'),
+                'action_url':reverse('calendrier1h_to_15'),
                 'numero_etudiant':num_etud,
                 'creneaux':creneaux,
                 'reservations':reservations,
@@ -165,21 +165,51 @@ def vueCalendrier(request):
 
     context = {
         'numero_etudiant': num_etud,
-        'action_url': reverse('calendrier15'),
+        'action_url': reverse('calendrier1h_to_15'),
     }
     return render(request, 'calendrier.html', context)
+
+def calendrier1h_to_15(request):
+    if request.method == 'POST':
+        # Récupérer le créneau choisi (date + heure) depuis le champ hidden 'selected_slot'
+        selected_slot = request.POST.get('selected_slot')  
+        # Stocker en session (ou autrement) pour l'utiliser dans calendrier15
+        if selected_slot:
+            date_str, hour_str = selected_slot.split(' ')
+            request.session['date_s'] = date_str
+            request.session['heure_s'] = hour_str
+        # Rediriger vers la vue calendrier15
+        return redirect('calendrier15')
+    else:
+        # Si on arrive en GET, on renvoie par exemple vers la page calendrier
+        return redirect('vueCalendrier')
 
 
 def calendrier15(request):
 
-    if request.method == 'POST':
-        creneau_str = request.POST.get('selected_slot')
-        date_str, heure_str = creneau_str.split()
+    if request.method == 'POST' and not request.POST.get('selected_slot'):
+        id_creneau=request.POST.get('selected_id')
+        box=request.POST.get('selected_box')
+        date=request.session.get('date_s')
+        etudiant=request.session.get('NumEtud')
+        idEtud=Etudiant.objects.get(num_etudiant=etudiant)
+        idCreneau=Creneau.objects.get(id=id_creneau)
+         # Création de la réservation
+        reserv=Reservation.objects.create(
+            etudiant=idEtud,
+            box_id=int(box),
+            creneau=idCreneau,
+            date_field=date,   
+            admin_field=False
+        )
+        reserv.save()
+        # Redirection
+        return redirect('vueCalendrier')  # ou accueilEtud, etc.
+    else:
+        date_str=request.session['date_s']
+        heure_str=request.session['heure_s']
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         heure_obj = datetime.strptime(heure_str, "%H:%M").time()
-        print('creneau', creneau_str)
-        print(f"Date : {date_obj}")
-        print(f"Heure : {heure_obj}")
         debut_heure = heure_obj
         fin_heure = (datetime.combine(datetime.min, heure_obj) + timedelta(hours=1)).time()
         creneaux_15_min_ids = Creneau.objects.filter(heure_debut__gte=debut_heure, heure_debut__lt=fin_heure).values_list('id', flat=True)

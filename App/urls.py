@@ -27,6 +27,7 @@ urlpatterns = [
     path('codeEtud/',views.codeEtud,name='codeEtud'),
     path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
     path('vueCalendrier/',views.vueCalendrier, name='vueCalendrier'),
+    path('calendrier1h_to_15/',views.calendrier1h_to_15,name='calendrier1h_to_15'),
     path('calendrier15/',views.calendrier15,name='calendrier15'),
     #path('profilEtudiant/',views.profilEtudiant,name='profilEtudiant'),
     path('profilEtudiant/<str:numero_etudiant>/', views.profilEtudiant, name='profilEtudiant'),

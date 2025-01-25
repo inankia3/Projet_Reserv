@@ -126,7 +126,7 @@
                 <tbody id="timeSlotsTable1">
                     {% for creneau in time_slots %}
                         <tr>
-                            <td class="time-slot {% if creneau.heure_debut in booked_slots1 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                            <td class="time-slot {% if creneau.heure_debut in booked_slots1 %}reserved{% endif %}" data-id="{{ creneau.id }}" data-box="1">
                                 {{ creneau.heure_debut }}
                             </td>
                         </tr>
@@ -146,7 +146,7 @@
                 <tbody id="timeSlotsTable2">
                     {% for creneau in time_slots %}
                         <tr>
-                            <td class="time-slot {% if creneau.heure_debut in booked_slots2 %}reserved{% endif %}" data-time="{{ creneau.heure_debut }}">
+                            <td class="time-slot {% if creneau.heure_debut in booked_slots2 %}reserved{% endif %}" data-id="{{ creneau.id }}" data-box="2">
                                 {{ creneau.heure_debut }}
                             </td>
                         </tr>
@@ -156,7 +156,9 @@
         </div>
 
         <input type="hidden" name="selected_slot" id="selectedSlot">
-        <br>
+        <input type="hidden" name="selected_box" id="selectedBox">
+        <input type="hidden" name="selected_id" id="selectedId">
+                <br>
         <button type="submit">Valider la sélection</button>
     </form>
     <a href="{% url 'vueCalendrier'%}" class="back-button">Retour</a>
@@ -164,6 +166,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectedSlotInput = document.getElementById('selectedSlot');
+            const selectedBoxInput = document.getElementById('selectedBox');
+            const selectedIdInput = document.getElementById('selectedId');
             let selectedSlot = null;
 
             // Les créneaux sont passés directement depuis Django
@@ -199,16 +203,23 @@
             });
 
             function updateSelectedSlot() {
-                selectedSlotInput.value = selectedSlot ? selectedSlot.getAttribute('data-time') : '';
+                if (selectedSlot) {
+                    selectedSlotInput.value = selectedSlot.getAttribute('data-time');
+                    selectedBoxInput.value = selectedSlot.getAttribute('data-box');
+                    selectedIdInput.value = selectedSlot.getAttribute('data-id');
+                } else {   
+                    selectedSlotInput.value = '';
+                    selectedBoxInput.value = '';
+                    selectedIdInput.value = '';               
+                }
             }
-
             document.getElementById('reservationDetailForm').addEventListener('submit', function(event) {
                 event.preventDefault();
                 if (!selectedSlot) {
                     alert('Veuillez sélectionner un créneau.');
                     return;
                 }
-                alert('Créneau sélectionné : ' + selectedSlotInput.value);
+                //alert('Créneau sélectionné : ' + selectedSlotInput.value + ', Box : ' + selectedBoxInput.value + ', ID : ' + selectedIdInput.value);
                 // Envoyer les données sélectionnées au serveur si nécessaire
                 this.submit();  // Si nécessaire, soumettez le formulaire
             });
