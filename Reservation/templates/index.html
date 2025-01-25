@@ -2,14 +2,12 @@
 {% block title %}Accueil{% endblock %}
 
 {% block content %}
-<h2>Réservation de Box</h2>
-<p>Bienvenue sur le site de réservation de box silencieuses.</p>
 
-<a href="{% url 'idEtudiant' %}">
-    <button>Étudiant</button>
-</a>
-
-<a href="{% url 'adminLogin' %}">
-    <button>Admin</button>
-</a>
+<div class="index-container">
+    <div class="index-box">
+        <h2>Réservation de Box</h2>
+        <p>Bienvenue sur le site de réservation de box silencieuses.</p>
+        <a href="{% url 'idEtudiant' %}"><button>Étudiant</button></a><a href="{% url 'adminLogin' %}"><button>Admin</button></a>
+    </div>
+</div>
 {% endblock %}

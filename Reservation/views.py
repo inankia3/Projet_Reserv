@@ -1,17 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
-from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 import datetime
 
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
-    texte = "<h2> Réservation de Box</h2><br>"
-    texte += "Bienvenue sur le site de réservation de box « silencieuses »<br><br>"
-    texte += "<a href='/idEtudiant'><button>Étudiant</button></a><br>"
-    texte += "<a href='/adminLogin'><button>Admin</button></a>"
-    return HttpResponse(texte)
+    return render(request, 'index.html')
 
 # -------------
 # ÉTUDIANT
@@ -117,6 +112,7 @@ def vueCalendrier(request):
         'action_url': reverse('calendrier1h_to_15'),
     }
     return render(request, 'calendrier.html', context)
+
 
 
 def calendrier1h_to_15(request):

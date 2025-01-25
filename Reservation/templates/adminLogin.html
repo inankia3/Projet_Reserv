@@ -1,26 +1,24 @@
-<!-- templates/adminLogin.html -->
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion Admin</title>
-</head>
-<body>
-    <h1>Connexion Admin</h1>
+{% extends 'base.html' %}
+{% block title %}Connexion Admin{% endblock %}
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-
-    <form method="POST" action="{% url 'adminLogin' %}">
-        {% csrf_token %}
-        <label for="username">Identifiant :</label>
-        <input type="text" id="username" name="username" required><br><br>
-
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" name="password" required><br><br>
-
-        <button type="submit">Se connecter</button>
-    </form>
-</body>
-</html>
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <h1>Connexion Admin</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="POST" action="{% url 'adminLogin' %}">
+            {% csrf_token %}
+            <label for="username">Identifiant :</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Mot de passe :</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Se connecter</button>
+        </form>
+        <div class="back-link">
+            <a href="{% url 'index' %}">Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

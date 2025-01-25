@@ -2,11 +2,18 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<h2>{{ title }}</h2>
-<form method="POST" action="{{ action_url }}">
-    {% csrf_token %}
-    <label for="inputEtud">{{ label }} :</label>
-    <input type="text" id="inputEtud" name="inputEtud" required>
-    <button type="submit">Valider</button>
-</form>
+<div class="login-container">
+    <div class="login-box">
+        <h1>{{ title }}</h1>
+        <form method="POST" action="{{ action_url }}">
+            {% csrf_token %}
+            <label for="inputEtud">{{ label }} :</label>
+            <input type="text" id="inputEtud" name="inputEtud" required>
+            <button type="submit">Valider</button>
+        </form>
+        <div class="back-link">
+            <a href="{% url 'index' %}">Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

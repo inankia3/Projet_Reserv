@@ -2,11 +2,18 @@
 {% block title %}Identification Étudiant{% endblock %}
 
 {% block content %}
-<h2>Saisir votre numéro étudiant</h2>
-<form method="POST" action="{% url 'idEtudiant' %}">
-    {% csrf_token %}
-    <label for="numEtud">Numéro étudiant :</label>
-    <input type="text" id="numEtud" name="numEtud" required>
-    <button type="submit">Valider</button>
-</form>
+<div class="login-container">
+    <div class="login-box">
+        <h1>Connexion Étudiant</h1>
+        <form method="POST" action="{% url 'idEtudiant' %}">
+            {% csrf_token %}
+            <label for="numEtud">Numéro étudiant :</label>
+            <input type="text" id="numEtud" name="numEtud" required>
+            <button type="submit">Valider</button>
+        </form>
+        <div class="back-link">
+            <a href="{% url 'index' %}">Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
 {% endblock %}
