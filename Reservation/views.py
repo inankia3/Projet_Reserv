@@ -207,10 +207,11 @@ def calendrier15(request):
 
 # Nouvelle vue pour le profil de l'étudiant
 def profilEtudiant(request,numero_etudiant):
-    global idEtud
+    
     num_etud=request.session.get('NumEtud')
+    idEtud=Etudiant.objects.filter(num_etudiant=num_etud)
     date_=date.today()
-    if not (request.session.get('is_admin') or num_etud == numero_etudiant):
+    if not (request.session.get('is_admin')) or (num_etud != numero_etudiant):
         return render(request, 'erreur.html', {
             'title': 'Accès refusé',
             'error': "Vous n'êtes pas autorisé à consulter ce profil.",
