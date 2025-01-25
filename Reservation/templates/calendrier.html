@@ -76,9 +76,14 @@
     </style>
 </head>
 <body>
-
     <h2>Réserver un créneau</h2>
-    
+
+    {% if error_message %}
+        <div class="error-message">
+            <p style="color: red;">{{ error_message }}</p>
+        </div>
+    {% endif %}
+
     {% if student_number %}
         <button class="profile-button" onclick="goToProfilePage('{{ student_number }}')">
             Profil (Étudiant n°{{ student_number }})
@@ -89,10 +94,8 @@
         </p>
     {% endif %}
 
-    <form id="reservationForm" method="POST" action="{{ action_url}}">
+    <form id="reservationForm" method="POST" action="{{ action_url }}">
         {% csrf_token %}
-
-        <!-- Sélecteur de semaine, tableau de créneaux etc. -->
         <label for="weekSelector">Sélectionner une semaine :</label>
         <select id="weekSelector"></select>
 
@@ -103,12 +106,8 @@
             <tbody id="timeSlotsTable"></tbody>
         </table>
 
-        <!-- Champ caché pour le créneau sélectionné -->
         <input type="hidden" name="selected_slot" id="selectedSlot">
-
-        <!-- Bouton désactivé par défaut -->
         <button id="validateBtn" type="submit" disabled>Valider la sélection</button>
     </form>
-
 </body>
 </html>

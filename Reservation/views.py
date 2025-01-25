@@ -3,6 +3,7 @@ from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
 from django.utils import timezone
 import datetime
+from datetime import timedelta
 
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
@@ -131,39 +132,62 @@ def calendrier1h_to_15(request):
         return redirect('vueCalendrier')
 
 def calendrier15(request):
-    """
-    - GET : Affiche la page avec 2 tableaux (Box1, Box2) 
-            + colorie en rouge les créneaux réservés 
-            + propose un choix cliquable sur les créneaux libres.
-    - POST : L'utilisateur a choisi un créneau / box => on crée la réservation.
-    """
     if request.method == 'POST':
-        # Traitement quand on clique sur "Valider" un sous-créneau
         chosen_creneau_id = request.POST.get('creneau_id')
         chosen_box_id = request.POST.get('box_id')
-        date_chosen = request.session.get('selected_date')  # ex "2025-02-10"
-        # Récupération de l'étudiant depuis la session
+        date_chosen = request.session.get('selected_date')
         student_number = request.session.get('NumEtud')
 
         if not (chosen_creneau_id and chosen_box_id and date_chosen and student_number):
-            # Mauvais usage
             return redirect('accueilEtud')
 
-        # Création de la réservation
         etudiant = Etudiant.objects.get(num_etudiant=student_number)
+
+        # Vérifier les conditions de réservation
+        maintenant = timezone.now()
+        delai_24h = etudiant.date_derniere_reserv + timedelta(hours=24)
+        if maintenant < delai_24h:
+            # L'étudiant a déjà réservé dans les dernières 24 heures
+            delai_restant = delai_24h - maintenant
+            heures_restantes = delai_restant.seconds // 3600
+            minutes_restantes = (delai_restant.seconds % 3600) // 60
+            message = f"Vous ne pouvez réserver qu'une fois toutes les 24 heures. Temps restant : {heures_restantes}h {minutes_restantes}min."
+            return render(request, 'calendrier.html', {
+                'student_number': student_number,
+                'action_url': reverse('calendrier1h_to_15'),
+                'error_message': message,
+            })
+
+        # Compter le nombre de réservations à venir
+        reservations_a_venir = Reservation.objects.filter(
+            etudiant=etudiant,
+            date_field__gte=maintenant.date()  # Réservations à partir d'aujourd'hui
+        ).count()
+
+        if reservations_a_venir >= 2:
+            # L'étudiant a déjà 2 réservations à venir
+            message = "Vous ne pouvez pas avoir plus de 2 réservations à venir."
+            return render(request, 'calendrier.html', {
+                'student_number': student_number,
+                'action_url': reverse('calendrier1h_to_15'),
+                'error_message': message,
+            })
+
+        # Si les conditions sont remplies, créer la réservation
         creneau_obj = Creneau.objects.get(id=chosen_creneau_id)
-        # On suppose que la table Reservation a un champ date_ (DateField),
-        # creneau (FK), box_id, etc.
         Reservation.objects.create(
             etudiant=etudiant,
             box_id=int(chosen_box_id),
             creneau=creneau_obj,
-            date_field=date_chosen,    # ou date_ selon votre champ
+            date_field=date_chosen,
             admin_field=False
         )
 
-        # Redirection
-        return redirect('vueCalendrier')  # ou accueilEtud, etc.
+        # Mettre à jour la date de la dernière réservation
+        etudiant.date_derniere_reserv = maintenant
+        etudiant.save()
+
+        return redirect('vueCalendrier')
 
     else:
         # --- GET : Affichage des 2 tableaux ---
@@ -238,27 +262,16 @@ def calendrier15(request):
 
 
 def profilEtudiant(request, student_number):
-    """
-    Affiche le profil d'un étudiant donné. 
-    On filtre ses réservations en fonction de la date du jour.
-    """
     etudiant = get_object_or_404(Etudiant, num_etudiant=student_number)
 
-    # --- Contrôle d’accès ---
-    is_admin = request.session.get('is_admin', False)               # bool
-    current_student = request.session.get('NumEtud', '')            # ex: '12345678'
-
-    # 2 conditions autorisées:
-    #  - Admin connecté
-    #  - Étudiant lui-même (session NumEtud == paramètre URL)
+    # Contrôle d’accès
+    is_admin = request.session.get('is_admin', False)
+    current_student = request.session.get('NumEtud', '')
     if not (is_admin or current_student == student_number):
-        # Ici, on bloque l’accès
-        # Soit on lève une exception, soit on redirige vers une page d'erreur.
-        # Exemple: on redirige vers un template "erreur.html" ou l'accueil
         return render(request, 'erreur.html', {
             'title': 'Accès refusé',
             'error': "Vous n'êtes pas autorisé à consulter ce profil.",
-            'action_url': reverse('index'),  
+            'action_url': reverse('index'),
         })
 
     # Réservations à venir
@@ -273,15 +286,12 @@ def profilEtudiant(request, student_number):
         date_field__lt=timezone.now().date()
     )
 
-    # Vérifier si la session contient 'is_admin'
-    is_admin = request.session.get('is_admin', False)
-
     context = {
         'title': 'Profil Étudiant',
         'student': etudiant,
         'reservations_a_venir': reservations_a_venir,
         'reservations_passees': reservations_passees,
-        'is_admin': is_admin,  # on passe True/False au template
+        'is_admin': is_admin,
     }
     return render(request, 'profilEtudiant.html', context)
 
@@ -464,16 +474,13 @@ def toggleBlockStudent(request, student_number):
     return redirect('profilEtudiant', student_number=student_number)
 
 def cancelReservation(request, reservation_id):
-    """
-    Supprime la réservation d'id = reservation_id de la base,
-    puis redirige vers profilAdmin ou autre.
-    """
-    # On récupère la réservation (ou 404 si inexistant)
     reservation = get_object_or_404(Reservation, id=reservation_id)
+    etudiant = reservation.etudiant
 
-    # Optionnel : on peut vérifier que l'admin est connecté
-    # if not request.session.get('is_admin'):
-    #    return redirect('adminLogin')
+    # Décrémenter le compteur de réservations à venir
+    if etudiant.reservations_a_venir > 0:
+        etudiant.reservations_a_venir -= 1
+        etudiant.save()
 
     reservation.delete()
-    return redirect('profilAdmin')
+    return redirect('profilEtudiant', student_number=etudiant.num_etudiant)
