@@ -209,7 +209,8 @@ def calendrier15(request):
 def profilEtudiant(request,numero_etudiant):
     
     num_etud=request.session.get('NumEtud')
-    idEtud=Etudiant.objects.filter(num_etudiant=num_etud)
+    idEtud=Etudiant.objects.filter(num_etudiant=num_etud).values_list('id', flat=True)
+    etud=Etudiant.objects.get(num_etudiant=num_etud)
     date_=date.today()
     if not (request.session.get('is_admin')) or (num_etud != numero_etudiant):
         return render(request, 'erreur.html', {
@@ -221,14 +222,13 @@ def profilEtudiant(request,numero_etudiant):
 
     #__gt signifie plus grand que : greater than or equal to
     reservations_a_venir=Reservation.objects.filter(etudiant__in=idEtud).filter(date_field__gte=date_).order_by('date_field')
-    print(f"a venir :{list(reservations_a_venir)}")
  
     reservations_passees=Reservation.objects.filter(etudiant__in=idEtud).filter(date_field__lt=date_).order_by('-date_field')
-    print(f"passee :{list(reservations_passees)}")
-    
+
 
     context = {
         'title': 'Profil Etudiant',
+        'etudiant':etud,
         'reservations_a_venir': reservations_a_venir,
         'reservations_passees': reservations_passees,
         'numero_etudiant': num_etud,
@@ -285,16 +285,19 @@ def profilAdmin(request):
     }
     return render(request, 'profilAdmin.html', context)
 
-def toggleBlockStudent(request, num_etud):
-    etudiant=Etudiant.objects.filter(num_etudiant=num_etud)
+def toggleBlockStudent(request, numero_etudiant):
+    etudiant=Etudiant.objects.get(num_etudiant=numero_etudiant)
     if not etudiant:
         return HttpResponse("Étudiant non trouvé", status=404)
 
     # Inverser l'état de blocage de l'étudiant
-    etudiant['autorise'] = not etudiant['autorise']
-
+    if(etudiant.autorise):
+        etudiant.autorise=False
+    else:
+        etudiant.autorise=True
+    etudiant.save()
     # Rediriger vers le profil de l'étudiant
-    return redirect('profilEtudiant', num_etudiant=num_etud)
+    return redirect('profilEtudiant', numero_etudiant)
 
 
 

@@ -68,9 +68,18 @@
     </style>
 </head>
 <body>
+
     <h2>Profil Étudiant</h2>
     <p><strong>Numéro étudiant :</strong> {{ numero_etudiant }}</p>
-
+    {% if is_admin %}
+    <p><strong>Statut : </strong> {% if not etudiant.autorise %}Actif{% else %}Bloqué{% endif %}</p>
+    <form action="{% url 'toggleBlockStudent' numero_etudiant %}" method="post" style="margin-bottom: 20px;">
+        {% csrf_token %}
+        <button type="submit" class="block-button">
+            {% if not etudiant.autorise %}Bloquer l'étudiant{% else %}Débloquer l'étudiant{% endif %}
+        </button>
+    </form>
+{% endif %}
     <div class="section">
         <h3>Réservations à venir</h3>
         <table>
