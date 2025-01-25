@@ -21,5 +21,5 @@ urlpatterns = [
     path('profilAdmin/', views.profilAdmin, name='profilAdmin'),
     path('toggleBlockStudent/<str:student_number>/', views.toggleBlockStudent, name='toggleBlockStudent'),
     path('blockSlotsAdmin/', views.blockSlotsAdmin, name='blockSlotsAdmin'),
-     path('cancelReservation/<int:reservation_id>/', views.cancelReservation, name='cancelReservation'),
+    path('cancelReservation/<int:reservation_id>/', views.cancelReservation, name='cancelReservation'),
 ]

@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const timeSlotsTable = document.getElementById('timeSlotsTable');
     const selectedHoursInput = document.getElementById('selectedHours');
     const blockButton = document.getElementById('blockButton');
-    const whichBoxInput = document.createElement('input');  // Champ caché
+
+    // Champ caché pour savoir si on bloque box1, box2, ou both
+    const whichBoxInput = document.createElement('input');
     whichBoxInput.type = "hidden";
     whichBoxInput.name = "which_box";
     document.getElementById('adminCalendarForm').appendChild(whichBoxInput);
@@ -12,16 +14,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ensemble des créneaux sélectionnés (ex: ["2025-02-10 09:00", "2025-02-10 10:00", ...])
     let selectedSlots = new Set();
 
-    // --- 1) Générer la liste des semaines dans le select
+    // 1) Générer la liste des semaines dans le select
+    //    Si on est samedi/dimanche, on part sur le lundi de la semaine PROCHAINE.
     function generateWeekOptions() {
         const now = new Date();
-        const currentDay = now.getDay(); // 0=Dim,1=Lun,...6=Sam
-        // On se ramène au lundi
-        let daysToMonday = (currentDay + 6) % 7; 
-        now.setDate(now.getDate() - daysToMonday);
+        let currentDay = now.getDay(); // 0=Dim,1=Lun,...6=Sam
 
-        for (let i=0; i<5; i++) {
-            // On va générer 5 semaines
+        if (currentDay === 0 || currentDay === 6) {
+            // Dimanche (0) ou Samedi (6)
+            // on avance jusqu'au lundi suivant
+            const daysToNextMonday = 8 - currentDay; 
+            now.setDate(now.getDate() + daysToNextMonday);
+        } else {
+            // On se ramène au lundi de la semaine courante
+            const daysToMonday = (currentDay + 6) % 7; 
+            now.setDate(now.getDate() - daysToMonday);
+        }
+
+        // On génère 5 semaines à partir de ce lundi (vous pouvez ajuster)
+        for (let i = 0; i < 5; i++) {
             const startOfWeek = new Date(now);
             startOfWeek.setDate(startOfWeek.getDate() + i*7);
             const endOfWeek = new Date(startOfWeek);
@@ -35,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 2) Générer l'entête (lundi..vendredi) + corps
+    // 2) Générer l'entête (lundi..vendredi)
     function generateDaysHeader(weekStart) {
         daysHeader.innerHTML = '';
         const days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
@@ -49,8 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 3) Générer le tableau 9h->17h sur 5 colonnes (lundi..vendredi)
-    //        + marquer bloqué/past si besoin
+    // 3) Générer le tableau 9h->16h sur 5 colonnes (lundi..vendredi)
+    //    + marquer bloqué/past si besoin
     function generateTimeSlots(weekStart) {
         timeSlotsTable.innerHTML = '';
         const days = 5; // Lundi..Vendredi
@@ -65,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentDate.setDate(currentDate.getDate() + dayIndex);
                 currentDate.setHours(hour,0,0,0);
 
-                // On formate "YYYY-MM-DD HH:MM"
+                // On formate "YYYY-MM-DD HH:00"
                 const isoDate = currentDate.toISOString().split('T')[0];
                 const hourStr = `${hour}:00`;
                 slotCell.setAttribute('data-date', isoDate);
@@ -74,29 +85,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Affichage
                 slotCell.textContent = hourStr;
 
-                // --- Contrôles : est-ce passé ? est-ce bloqué ?
+                // Est-ce passé ?
                 const now = new Date();
                 if (currentDate < now) {
-                    // Passé
                     slotCell.classList.add('past');
                 } else {
-                    // TODO : si c'est déjà bloqué (ex. si l'admin a déjà réservé => 
-                    //        verif BDD? => so, on a besoin d'un JSON `blockedSlots`.
-                    //        Pour l'exemple, on gère "simulate" ou on skip.
-                    //        => On appelle un array "blockedSlots" ?
-
-                    // ex: if blockedSlots.includes( isoDate + " " + hourStr ) { 
-                    //    slotCell.classList.add('blocked');
-                    // } else {
-                    //    -> on rend selectable
+                    // TODO : si c'est déjà bloqué => check BDD (blockedSlots ?)
+                    // ex: if (blockedSlots.includes( isoDate + " " + hourStr )) {
+                    //     slotCell.classList.add('blocked');
                     // }
-                    
+
                     slotCell.addEventListener('click', function() {
-                        // Si déjà bloqué, on ignore
                         if (slotCell.classList.contains('blocked')) {
                             return;
                         }
-                        // Toggle la sélection
                         const slotKey = isoDate + " " + hourStr;
                         if (selectedSlots.has(slotKey)) {
                             selectedSlots.delete(slotKey);
@@ -115,36 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 4) Met à jour le champ caché
+    // 4) Met à jour le champ caché
     function updateSelectedSlots() {
-        // On transforme selectedSlots en tableau
         const arr = Array.from(selectedSlots);
         selectedHoursInput.value = arr.join(',');
     }
 
-    // --- 5) Sur le bouton "Bloquer"
-    blockButton.addEventListener('click', function(e) {
-        // Si rien n’est sélectionné
-        if (selectedSlots.size === 0) {
-            alert("Aucun créneau sélectionné");
-            e.preventDefault(); // on empêche l’envoi du form
-        } else {
-            // Sinon on laisse le form s’envoyer
-            // Le champ hidden "selectedHours" contient la liste
-        }
-    });
-
-    // --- 6) Gestion du "weekSelector" (pour charger un autre lundi)
-    weekSelector.addEventListener('change', function() {
-        selectedSlots.clear();
-        updateSelectedSlots();
-        
-        const mondayValue = weekSelector.value; // "2025-02-10"
-        const mondayDate = new Date(mondayValue + "T00:00:00");
-        generateDaysHeader(mondayDate);
-        generateTimeSlots(mondayDate);
-    });
-
+    // 5) Sur le bouton "Bloquer" : on sélectionne box1, box2 ou both
     blockButton.addEventListener('click', function(e) {
         if (selectedSlots.size === 0) {
             alert("Aucun créneau sélectionné");
@@ -152,10 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // On affiche un pop-up pour demander quel box
-        // Ex: "Voulez-vous bloquer le box1, le box2, ou les 2 ? 
-        //     Taper '1', '2' ou 'both'"
-
+        // Pop-up pour demander quel box bloquer
         const choice = prompt("Tapez '1' pour bloquer le box1, '2' pour le box2, ou 'both' pour les deux.");
         if (!choice) {
             e.preventDefault();
@@ -168,22 +144,29 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (choice.toLowerCase() === "2") {
             whichBoxValue = "2";
         } else if (choice.toLowerCase() === "both") {
-            whichBoxValue = "Les deux";
+            whichBoxValue = "Les deux"; 
+            // ou "both" => c'est vous qui décidez
         } else {
-            // Réponse invalide
             alert("Réponse invalide. Veuillez réessayer.");
             e.preventDefault();
             return;
         }
-
-        // On place la valeur dans whichBoxInput
         whichBoxInput.value = whichBoxValue;
+        // Le formulaire se soumettra avec selected_hours + which_box
+    });
 
-        // On laisse le form se soumettre
+    // 6) Lorsqu’on change la semaine
+    weekSelector.addEventListener('change', function() {
+        selectedSlots.clear();
+        updateSelectedSlots();
+        
+        const mondayValue = weekSelector.value; // ex "2025-02-10"
+        const mondayDate = new Date(mondayValue + "T00:00:00");
+        generateDaysHeader(mondayDate);
+        generateTimeSlots(mondayDate);
     });
 
     // Initialisation
     generateWeekOptions();
-    // Simuler un "change" pour la première semaine
     weekSelector.dispatchEvent(new Event('change'));
 });
