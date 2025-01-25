@@ -107,10 +107,11 @@
     <h2>Réserver un créneau</h2>
     
     <!-- Bouton profil -->
-    <button class="profile-button" onclick="goToProfilePage()">
-        Profil (Numéro étudiant: {{ student_number }})
+     {% if numero_etudiant%}
+    <button class="profile-button" onclick="goToProfilePage('{{numero_etudiant}}')">
+        Profil (Numéro étudiant: {{ numero_etudiant }})
     </button>
-
+    {%endif%}
     <form id="reservationForm" method="POST" action="{{ action_url }}">
         {% csrf_token %}
 
@@ -231,8 +232,8 @@
             weekSelector.dispatchEvent(new Event('change')); // Générer les créneaux pour la première semaine par défaut
         });
 
-        function goToProfilePage() {
-            window.location.href = "/profilEtudiant"; // Rediriger vers la page du profil de l'étudiant
+        function goToProfilePage(numeroEtudiant) {
+            window.location.href = "/profilEtudiant/" + numeroEtudiant + "/"; // Rediriger vers la page du profil de l'étudiant
         }
     </script>
 </body>

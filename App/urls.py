@@ -21,16 +21,20 @@ from Reservation import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.index,name='index'),
+
+    #parcours étudiant
     path('idEtudiant/',views.idEtudiant,name='idEtudiant'),
     path('codeEtud/',views.codeEtud,name='codeEtud'),
     path('accueilEtud/',views.accueilEtud,name='accueilEtud'),
+    path('vueCalendrier/',views.vueCalendrier, name='vueCalendrier'),
     path('calendrier15/',views.calendrier15,name='calendrier15'),
-    path('profilEtudiant/',views.profilEtudiant,name='profilEtudiant'),
+    #path('profilEtudiant/',views.profilEtudiant,name='profilEtudiant'),
+    path('profilEtudiant/<str:numero_etudiant>/', views.profilEtudiant, name='profilEtudiant'),
+   
+    #parcours admin
     path('adminLogin/',views.adminLogin,name='adminLogin'),
     path('accueilAdmin/',views.accueilAdmin,name='accueilAdmin'),
-    path('Reservation/',views.index,name='index'),
     path('profilAdmin/',views.profilAdmin,name='profilAdmin'),
-    path('profilEtudiant/<str:student_number>/', views.profilEtudiant, name='profilEtudiant'),
-    path('toggleBlockStudent/<str:student_number>/', views.toggleBlockStudent, name='toggleBlockStudent'),
+    path('toggleBlockStudent/<str:numero_etudiant>/', views.toggleBlockStudent, name='toggleBlockStudent'),
 
     ]

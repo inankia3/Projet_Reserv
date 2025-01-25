@@ -55,11 +55,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for student in students %}
+                {% for etudiant in etudiants %}
                 <tr>
-                    <td><a href="{% url 'profilEtudiant' student.num_etudiant %}">{{ student.student_number }}</a></td>
-                    <td class="{% if student.blocked %}blocked{% endif %}">
-                        {% if student.blocked %}Bloqué{% else %}Actif{% endif %}
+                    <td><a href="{% url 'profilEtudiant' etudiant.num_etudiant %}">{{ etudiant.num_etudiant }}</a></td>
+                    <td class="{% if not etudiant.autorise %}blocked{% endif %}">
+                        {% if not etudiant.autorise %}Bloqué{% else %}Actif{% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -78,14 +78,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for reservation in reservations_today %}
+                {% for reservation in reservations_jour %}
                 <tr>
-                    <td>{{ reservation.student_number }}</td>
-                    <td>{{ reservation.box_number }}</td>
-                    <td>{{ reservation.time }}</td>
+                    <td>{{ reservation.etudiant.num_etudiant }}</td>
+                    <td>{{ reservation.box_id }}</td>
+                    <td>{{ reservation.creneau.heure_debut|time:"H:i"}} - {{reservation.creneau.heure_fin|time:"H:i" }}</td>
                 </tr>
                 {% endfor %}
-                {% if reservations_today|length == 0 %}
+                {% if reservations_jour|length == 0 %}
                 <tr>
                     <td colspan="3">Aucune réservation aujourd'hui.</td>
                 </tr>
