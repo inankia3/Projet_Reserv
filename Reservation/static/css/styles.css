@@ -260,3 +260,118 @@ th {
 .index-box a button:hover {
     background: #ff4500; /* Rouge orangé */
 }
+
+/* Styles pour le profil étudiant et admin */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+.profile-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 800px;
+}
+
+.profile-box h2 {
+    font-size: 2rem;
+    color: #b22222; /* Rouge foncé */
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.profile-box p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.profile-box .section {
+    margin-bottom: 2rem;
+}
+
+.profile-box .section h3 {
+    font-size: 1.5rem;
+    color: #b22222; /* Rouge foncé */
+    margin-bottom: 1rem;
+}
+
+.profile-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.profile-box table th,
+.profile-box table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.profile-box table th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.profile-box table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.profile-box .block-button {
+    padding: 0.75rem 1.5rem;
+    background: #b22222; /* Rouge foncé */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.profile-box .block-button:hover {
+    background: #ff4500; /* Rouge orangé */
+}
+
+.profile-box .back-button {
+    padding: 0.75rem 1.5rem;
+    background: #b22222; /* Rouge foncé */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.profile-box .back-button:hover {
+    background: #ff4500; /* Rouge orangé */
+}
+
+/* Styles spécifiques pour le profil admin */
+.profile-box .cancel-btn {
+    color: #b22222; /* Rouge foncé */
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.profile-box .cancel-btn:hover {
+    color: #ff4500; /* Rouge orangé */
+}
+
+.profile-box .blocked {
+    color: #ff4444; /* Rouge clair */
+    font-weight: bold;
+}

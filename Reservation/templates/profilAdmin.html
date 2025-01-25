@@ -1,102 +1,82 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .section { margin-bottom: 40px; }
-        .back-button {
-            padding: 10px 20px; background-color: #4CAF50; color: white;
-            text-decoration: none; border-radius: 5px;
-        }
-        .back-button:hover { background-color: #45a049; }
-        .blocked { color: red; font-weight: bold; }
-        .cancel-btn { color: red; text-decoration: underline; cursor: pointer; }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Profil Admin{% endblock %}
 
-    <h2>Profil Admin</h2>
+{% block content %}
+<div class="profile-container">
+    <div class="profile-box">
+        <h2>Profil Admin</h2>
 
-    <div class="section">
-        <h3>Liste des étudiants</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Numéro étudiant</th>
-                    <th>Autorisé ?</th>
-                    <th>Date dernière réserv.</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <!-- Lien vers la page profilEtudiant -->
-                    <td>
-                        <a href="{% url 'profilEtudiant' student.num_etudiant %}">
-                            {{ student.num_etudiant }}
-                        </a>
-                    </td>
-                    <td>
-                        {% if student.autorise %}Oui{% else %}<span class="blocked">Non</span>{% endif %}
-                    </td>
-                    <td>
-                        {% if student.date_derniere_reserv %}
-                            {{ student.date_derniere_reserv|date:"d/m/Y H:i" }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="section">
+            <h3>Liste des étudiants</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numéro étudiant</th>
+                        <th>Autorisé ?</th>
+                        <th>Date dernière réserv.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'profilEtudiant' student.num_etudiant %}">
+                                {{ student.num_etudiant }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if student.autorise %}Oui{% else %}<span class="blocked">Non</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if student.date_derniere_reserv %}
+                                {{ student.date_derniere_reserv|date:"d/m/Y H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>Réservations du jour</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numéro étudiant</th>
+                        <th>Créneau</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations_today %}
+                    <tr>
+                        <td>{{ reservation.etudiant.num_etudiant }}</td>
+                        <td>
+                            {% if reservation.creneau %}
+                                {{ reservation.creneau.heure_debut }} - {{ reservation.creneau.heure_fin }}
+                            {% else %}
+                                creneau id={{ reservation.creneau_id }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'cancelReservation' reservation.id %}" class="cancel-btn">
+                                Annuler
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">Aucune réservation étudiante aujourd'hui.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="javascript:history.back()" class="back-button">Retour</a>
     </div>
-
-    <div class="section">
-        <h3>Réservations du jour</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Numéro étudiant</th>
-                    <th>Créneau</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for reservation in reservations_today %}
-                <tr>
-                    <td>{{ reservation.etudiant.num_etudiant }}</td>
-                    <td>
-                        <!-- On suppose que vous avez reservation.creneau.heure_debut, .heure_fin -->
-                        {% if reservation.creneau %}
-                            {{ reservation.creneau.heure_debut }} - {{ reservation.creneau.heure_fin }}
-                        {% else %}
-                            creneau id={{ reservation.creneau_id }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        <!-- Lien "Annuler" => /cancelReservation/reservation.id/ -->
-                        <a href="{% url 'cancelReservation' reservation.id %}" class="cancel-btn">
-                            Annuler
-                        </a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3">Aucune réservation étudiante aujourd'hui.</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <a href="javascript:history.back()" class="back-button">Retour</a>
-
-</body>
-</html>
+</div>
+{% endblock %}
