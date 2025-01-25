@@ -343,22 +343,34 @@ def accueilAdmin(request):
     }
     return render(request, 'calendrierAdmin.html', context)
 
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('is_admin', False):
+            return redirect('adminLogin')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
+@admin_required
 def profilAdmin(request):
     """
-    Affiche la liste des étudiants + les réservations du jour.
+    Affiche :
+      - la liste de tous les étudiants
+      - les réservations "du jour" qui ne sont pas admin (admin_field=False)
     """
-    # Récupération de tous les étudiants
-    students = Etudiant.objects.all()
+    # Récupérer tous les étudiants
+    students = Etudiant.objects.all().order_by('num_etudiant')
 
-    # Pour la démonstration, vous utilisez 'Reservation.objects.filter(date=...)'
-    # mais dans votre modèle, vous avez 'date_field' -> Vérifiez la cohérence
-    reservations_today = Reservation.objects.filter(date_field=timezone.now().date())
+    # Réservations du jour (admin_field=False => vraies réservations d'étudiant)
+    today = timezone.now().date()
+    reservations_today = Reservation.objects.filter(
+        date_field=today,
+        admin_field=False
+    ).order_by('creneau__heure_debut')  # ou un autre ordre de tri
 
     context = {
         'title': 'Profil Admin',
         'students': students,
-        'reservations_today': reservation_jour,
+        'reservations_today': reservations_today,
     }
     return render(request, 'profilAdmin.html', context)
 
@@ -454,3 +466,18 @@ def toggleBlockStudent(request, student_number):
     etudiant.autorise = not etudiant.autorise
     etudiant.save()
     return redirect('profilEtudiant', student_number=student_number)
+
+def cancelReservation(request, reservation_id):
+    """
+    Supprime la réservation d'id = reservation_id de la base,
+    puis redirige vers profilAdmin ou autre.
+    """
+    # On récupère la réservation (ou 404 si inexistant)
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+
+    # Optionnel : on peut vérifier que l'admin est connecté
+    # if not request.session.get('is_admin'):
+    #    return redirect('adminLogin')
+
+    reservation.delete()
+    return redirect('profilAdmin')
