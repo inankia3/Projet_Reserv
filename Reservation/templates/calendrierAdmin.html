@@ -7,6 +7,11 @@
     <div class="calendar-box">
         <h2>Calendrier Admin</h2>
 
+        <!-- Bouton pour accéder au profil admin -->
+        <a href="{% url 'profilAdmin' %}" class="profile-button">
+            Profil Admin
+        </a>
+
         <form id="adminCalendarForm" method="POST" action="{% url 'blockSlotsAdmin' %}">
             {% csrf_token %}
 

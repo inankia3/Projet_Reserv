@@ -48,11 +48,6 @@ def codeEtud(request):
 
 
 def accueilEtud(request):
-    """
-    Traitement du code de vérification.
-    Si le code est bon, on vérifie/crée l'étudiant en base,
-    puis on l'envoie vers le calendrier ou une page d'accueil étudiant.
-    """
     if request.method == 'POST':
         code = request.POST.get('inputEtud')
         if code != "0000":
@@ -75,13 +70,21 @@ def accueilEtud(request):
                 }
                 return render(request, 'erreur.html', context)
 
-            # Vérifier / créer l'étudiant dans la BDD
-            etudiant, created = Etudiant.objects.get_or_create(num_etudiant=num_etud)
+            # Vérifier si l'étudiant est bloqué
+            etudiant = Etudiant.objects.get(num_etudiant=num_etud)
+            if not etudiant.autorise:
+                # Étudiant bloqué
+                context = {
+                    'title': 'Accès refusé',
+                    'error': 'Vous avez été interdit de réservation de box pour mauvais comportement. Veuillez contacter la responsable de la bibliothèque pour plus d\'informations.',
+                    'action_url': reverse('index'),
+                }
+                return render(request, 'erreur.html', context)
 
-            # On passe le numéro étudiant au template calendrier
+            # Si l'étudiant n'est pas bloqué, continuer
             return render(request, 'calendrier.html', {
                 'student_number': num_etud,
-                'action_url': reverse('calendrier1h_to_15')  # <-- On met l'URL de la vue calendrier1h_to_15
+                'action_url': reverse('calendrier1h_to_15'),
             })
 
     else:
@@ -466,12 +469,14 @@ def blockSlotsAdmin(request):
 
 
 def toggleBlockStudent(request, student_number):
-    """
-    Bloquer / Débloquer un étudiant (changement du champ 'autorise').
-    """
+    # Récupérer l'étudiant
     etudiant = get_object_or_404(Etudiant, num_etudiant=student_number)
+
+    # Inverser le statut d'autorisation
     etudiant.autorise = not etudiant.autorise
     etudiant.save()
+
+    # Rediriger vers le profil de l'étudiant
     return redirect('profilEtudiant', student_number=student_number)
 
 def cancelReservation(request, reservation_id):

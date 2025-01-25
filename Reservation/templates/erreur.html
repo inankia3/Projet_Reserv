@@ -2,9 +2,14 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<p style="color: red;">Erreur : {{ error }}</p>
-<form method="POST" action="{{ action_url }}">
-    {% csrf_token %}
-    <button type="submit">Retour à l'accueil</button>
-</form>
+<div class="error-container">
+    <div class="error-box">
+        <h2>{{ title }}</h2>
+        <p style="color: red;">{{ error }}</p>
+        <form method="POST" action="{{ action_url }}">
+            {% csrf_token %}
+            <button type="submit" class="back-button">Retour à l'accueil</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

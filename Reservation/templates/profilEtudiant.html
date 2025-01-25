@@ -7,7 +7,6 @@
         <h2>Profil Étudiant</h2>
         <p><strong>Numéro étudiant :</strong> {{ student.num_etudiant }}</p>
         <p><strong>Statut :</strong> {% if student.autorise %}Actif{% else %}<span class="blocked">Bloqué</span>{% endif %}</p>
-        <p><strong>Réservations à venir :</strong> {{ reservations_a_venir.count }}</p>
 
         <!-- Bouton bloquer/débloquer l'étudiant -->
         {% if is_admin %}
@@ -19,6 +18,7 @@
             </form>
         {% endif %}
 
+        <!-- Réservations à venir et passées -->
         <div class="section">
             <h3>Réservations à venir</h3>
             {% if reservations_a_venir %}
