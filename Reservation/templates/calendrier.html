@@ -7,6 +7,13 @@
     <div class="calendar-box">
         <h2>Réserver un créneau</h2>
 
+        <!-- Conteneur pour le message d'erreur -->
+        {% if error_message %}
+            <div class="error-message">
+                <p>{{ error_message }}</p>
+            </div>
+        {% endif %}
+
         {% if student_number %}
             <button class="profile-button" onclick="goToProfilePage('{{ student_number }}')">
                 Profil (Étudiant n°{{ student_number }})

@@ -146,31 +146,32 @@ def calendrier15(request):
         # Vérifier les conditions de réservation
         maintenant = timezone.now()
         delai_24h = etudiant.date_derniere_reserv + timedelta(hours=24)
+
+        # Compter les réservations à venir
+        reservations_a_venir = Reservation.objects.filter(
+            etudiant=etudiant,
+            date_field__gte=maintenant.date()
+        ).count()
+
         if maintenant < delai_24h:
             # L'étudiant a déjà réservé dans les dernières 24 heures
             delai_restant = delai_24h - maintenant
             heures_restantes = delai_restant.seconds // 3600
             minutes_restantes = (delai_restant.seconds % 3600) // 60
-            message = f"Vous ne pouvez réserver qu'une fois toutes les 24 heures. Temps restant : {heures_restantes}h {minutes_restantes}min."
+            error_message = f"Vous ne pouvez réserver qu'une fois toutes les 24 heures. Temps restant : {heures_restantes}h {minutes_restantes}min."
             return render(request, 'calendrier.html', {
                 'student_number': student_number,
                 'action_url': reverse('calendrier1h_to_15'),
-                'error_message': message,
+                'error_message': error_message,
             })
-
-        # Compter le nombre de réservations à venir
-        reservations_a_venir = Reservation.objects.filter(
-            etudiant=etudiant,
-            date_field__gte=maintenant.date()  # Réservations à partir d'aujourd'hui
-        ).count()
 
         if reservations_a_venir >= 2:
             # L'étudiant a déjà 2 réservations à venir
-            message = "Vous ne pouvez pas avoir plus de 2 réservations à venir."
+            error_message = "Vous ne pouvez pas avoir plus de 2 réservations à venir."
             return render(request, 'calendrier.html', {
                 'student_number': student_number,
                 'action_url': reverse('calendrier1h_to_15'),
-                'error_message': message,
+                'error_message': error_message,
             })
 
         # Si les conditions sont remplies, créer la réservation

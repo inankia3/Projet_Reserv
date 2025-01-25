@@ -199,6 +199,7 @@ th {
     cursor: not-allowed;
     padding: 8px 12px; /* Ajustement du padding */
     border-radius: 5px; /* Bordures arrondies */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ombre portée */
 }
 
 .tables-container button {
@@ -577,4 +578,19 @@ th {
 .profile-box .blocked {
     color: #ff4444; /* Rouge clair */
     font-weight: bold;
+}
+
+/* Styles pour le message d'erreur */
+.error-message {
+    background-color: #ffcccc; /* Fond rouge clair */
+    border: 1px solid #ff4444; /* Bordure rouge */
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #b22222; /* Texte rouge foncé */
+    text-align: center;
+}
+
+.error-message p {
+    margin: 0; /* Supprimer la marge par défaut */
 }
