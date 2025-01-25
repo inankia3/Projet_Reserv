@@ -20,4 +20,5 @@ urlpatterns = [
     path('accueilAdmin/', views.accueilAdmin, name='accueilAdmin'),
     path('profilAdmin/', views.profilAdmin, name='profilAdmin'),
     path('toggleBlockStudent/<str:student_number>/', views.toggleBlockStudent, name='toggleBlockStudent'),
+    path('blockSlotsAdmin/', views.blockSlotsAdmin, name='blockSlotsAdmin'),
 ]

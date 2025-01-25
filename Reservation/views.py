@@ -363,6 +363,88 @@ def profilAdmin(request):
     return render(request, 'profilAdmin.html', context)
 
 
+def blockSlotsAdmin(request):
+    """
+    Reçoit en POST `selected_hours` (ex: "2025-02-10 09:00,2025-02-10 10:00") 
+    + which_box ("1","2","both").
+    Pour chaque créneau d'une heure, on crée 4 (ou 8) reservations admin_field=True.
+    """
+    if request.method == 'POST':
+        selected_hours = request.POST.get('selected_hours', '').strip()
+        which_box = request.POST.get('which_box', '').strip()  # "1","2","both"
+
+        if not selected_hours:
+            return redirect('accueilAdmin')
+
+        list_slots = selected_hours.split(',')  # ex. ["2025-02-10 09:00", ...]
+
+        for slot in list_slots:
+            slot = slot.strip()
+            date_str, hour_str = slot.split(' ')
+            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+            h, m = hour_str.split(':')
+            hour_int = int(h)
+
+            # On trouve le premier creneau 15 min => hour_int:00 -> hour_int:15
+            heure_debut = datetime.time(hour_int, 0)
+            heure_fin = (datetime.datetime.combine(date_obj, heure_debut)
+                         + datetime.timedelta(minutes=15)).time()
+
+            first_creneau = Creneau.objects.filter(
+                heure_debut=heure_debut,
+                heure_fin=heure_fin
+            ).first()
+
+            if not first_creneau:
+                # ne pas planter, on skip
+                continue
+
+            # On crée 4 ou 8 reservations
+            # => offset = 0..3 => creneau_id = first_creneau.id + offset
+            # => si which_box = "1", on fait box_id=1
+            # => si which_box = "2", box_id=2
+            # => si "both", on fait 2 reservations par offset: box1 + box2
+
+            for offset in range(4):
+                creneau_id = first_creneau.id + offset
+
+                if which_box == "1":
+                    Reservation.objects.create(
+                        etudiant_id=None,
+                        box_id=1,
+                        date_field=date_obj,
+                        creneau_id=creneau_id,
+                        admin_field=True
+                    )
+                elif which_box == "2":
+                    Reservation.objects.create(
+                        etudiant_id=None,
+                        box_id=2,
+                        date_field=date_obj,
+                        creneau_id=creneau_id,
+                        admin_field=True
+                    )
+                elif which_box == "both":
+                    # 2 reservations (box1 + box2)
+                    Reservation.objects.create(
+                        etudiant_id=None,
+                        box_id=1,
+                        date_field=date_obj,
+                        creneau_id=creneau_id,
+                        admin_field=True
+                    )
+                    Reservation.objects.create(
+                        etudiant_id=None,
+                        box_id=2,
+                        date_field=date_obj,
+                        creneau_id=creneau_id,
+                        admin_field=True
+                    )
+
+        return redirect('accueilAdmin')
+    else:
+        return redirect('accueilAdmin')
+
 
 def toggleBlockStudent(request, student_number):
     """
