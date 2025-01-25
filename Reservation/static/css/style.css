@@ -1,0 +1,184 @@
+/*    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+
+/*commun*/
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 20px;
+    padding: 20px;
+}
+.back-button {
+    padding: 10px 20px;
+    background-color: #BF1E2E; /* Rouge inspiré par le logo */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.back-button:hover {
+    background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+}
+h2 {
+    font-size: 2em;
+    margin: 0;
+    padding: 10px 0;
+}
+
+main {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+/*Profil etudiant*/
+
+header {
+    text-align: center;
+    padding: 10px 0;
+}
+/*
+h2 {
+    color: #BF1E2E;
+}*/
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+
+.date-column {
+    width: 40%;
+}
+
+.creneau-column {
+    width: 40%;
+}
+
+.box-column {
+    width: 20%;
+}
+/*calendrier15*/
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.box-container {
+    width: 100%;
+    margin-bottom: 20px;
+}
+label {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #BF1E2E; /* Rouge inspiré par le logo */
+}
+select, input[type="text"], input[type="password"], input[type="submit"], button {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+input[type="submit"], button {
+    background-color: #BF1E2E; /* Rouge inspiré par le logo */
+    color: white;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover, button:hover {
+    background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 10px;
+}
+.time-slot {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.time-slot.selected {
+    background-color: #d4edda; /* Vert pâle */
+    font-weight: bold;
+}
+
+.time-slot.reserved {
+    background-color: #ff4d4d; /* Rouge */
+    cursor: not-allowed;
+}
+
+
+
+/*calendrier*/
+.profile-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 10px 20px;
+    background-color: #BF1E2E; /* Rouge inspiré par le logo */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.profile-button:hover {
+    background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
+}
+
+
+h1 {
+
+    font-size: 2em; 
+    margin: 0;
+    padding: 10px 0;
+}
+
+p {
+    color: red;
+}
+
+
+.section {
+    margin-bottom: 40px;
+}
+.blocked {
+    color: red;
+    font-weight: bold;
+}
