@@ -116,6 +116,7 @@ def accueilEtud(request):
         #Code correct
         else:
             num_etud = request.session.get('NumEtud', '')
+            request.session['is_admin']=False
             if not num_etud:
                 # Si la session est vide ou a expiré
                 context = {
@@ -212,7 +213,7 @@ def profilEtudiant(request,numero_etudiant):
     idEtud=Etudiant.objects.filter(num_etudiant=num_etud).values_list('id', flat=True)
     etud=Etudiant.objects.get(num_etudiant=num_etud)
     date_=date.today()
-    if not (request.session.get('is_admin')) or (num_etud != numero_etudiant):
+    if not (request.session.get('is_admin')) and (num_etud != numero_etudiant):
         return render(request, 'erreur.html', {
             'title': 'Accès refusé',
             'error': "Vous n'êtes pas autorisé à consulter ce profil.",
@@ -291,10 +292,10 @@ def toggleBlockStudent(request, numero_etudiant):
         return HttpResponse("Étudiant non trouvé", status=404)
 
     # Inverser l'état de blocage de l'étudiant
-    if(etudiant.autorise):
-        etudiant.autorise=False
+    if(etudiant.autorise==1):
+        etudiant.autorise=0
     else:
-        etudiant.autorise=True
+        etudiant.autorise=1
     etudiant.save()
     # Rediriger vers le profil de l'étudiant
     return redirect('profilEtudiant', numero_etudiant)

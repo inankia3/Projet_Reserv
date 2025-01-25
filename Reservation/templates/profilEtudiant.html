@@ -72,11 +72,11 @@
     <h2>Profil Étudiant</h2>
     <p><strong>Numéro étudiant :</strong> {{ numero_etudiant }}</p>
     {% if is_admin %}
-    <p><strong>Statut : </strong> {% if not etudiant.autorise %}Actif{% else %}Bloqué{% endif %}</p>
+    <p><strong>Statut : </strong> {% if  etudiant.autorise %}Actif{% else %}Bloqué{% endif %}</p>
     <form action="{% url 'toggleBlockStudent' numero_etudiant %}" method="post" style="margin-bottom: 20px;">
         {% csrf_token %}
         <button type="submit" class="block-button">
-            {% if not etudiant.autorise %}Bloquer l'étudiant{% else %}Débloquer l'étudiant{% endif %}
+            {% if  etudiant.autorise %}Bloquer l'étudiant{% else %}Débloquer l'étudiant{% endif %}
         </button>
     </form>
 {% endif %}
@@ -133,7 +133,11 @@
             </tbody>
         </table>
     </div>
+{% if is_admin %}
+    <a href="{% url 'profilAdmin'%}" class="back-button">Retour</a>
+{% else %}
+    <a href="{% url 'vueCalendrier'%}" class="back-button">Retour</a>
 
-    <a href="javascript:history.back()" class="back-button">Retour</a>
+{% endif %}
 </body>
 </html>
