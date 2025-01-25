@@ -89,7 +89,7 @@
         </p>
     {% endif %}
 
-    <form id="reservationForm" method="POST" action="/calendrier1h_to_15/">
+    <form id="reservationForm" method="POST" action="{{ action_url}}">
         {% csrf_token %}
 
         <!-- Sélecteur de semaine, tableau de créneaux etc. -->

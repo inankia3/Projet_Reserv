@@ -120,19 +120,19 @@ def vueCalendrier(request):
 
 
 def calendrier1h_to_15(request):
-    """
-    Reçoit le créneau 1h sélectionné depuis calendrier.html,
-    stocke l'info en session, puis redirige vers la page calendrier15.html.
-    """
     if request.method == 'POST':
+        # Récupérer le créneau choisi (date + heure) depuis le champ hidden 'selected_slot'
         selected_slot = request.POST.get('selected_slot')  # ex: "2025-02-10 13:00"
-        # On le stocke en session (ou on pourrait passer en paramètre GET)
-        request.session['selected_slot'] = selected_slot
-
-        return redirect('calendrier15')  # On va vers la vue calendrier15
+        # Stocker en session (ou autrement) pour l'utiliser dans calendrier15
+        if selected_slot:
+            date_str, hour_str = selected_slot.split(' ')
+            request.session['selected_date'] = date_str
+            request.session['selected_hour'] = hour_str
+        # Rediriger vers la vue calendrier15
+        return redirect('calendrier15')
     else:
-        # Si on arrive en GET, on renvoie ailleurs
-        return redirect('accueilEtud')
+        # Si on arrive en GET, on renvoie par exemple vers la page calendrier
+        return redirect('vueCalendrier')
 
 def calendrier15(request):
     """
