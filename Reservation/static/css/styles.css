@@ -23,14 +23,216 @@ th {
     background-color: #f4f4f4;
 }
 
-.back-button,
-.block-button,
+/* Styles pour le calendrier et le calendrier admin */
+.calendar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+.calendar-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1000px;
+    position: relative;
+}
+
+.calendar-box h2 {
+    font-size: 2rem;
+    color: #b22222; /* Rouge foncé */
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.calendar-box label {
+    font-size: 1rem;
+    color: #555;
+    margin-right: 10px;
+}
+
+.calendar-box select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.calendar-box select:focus {
+    border-color: #b22222; /* Rouge foncé */
+}
+
+.calendar-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.calendar-box th,
+.calendar-box td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.calendar-box th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.calendar-box .time-slot {
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.calendar-box .time-slot.selected {
+    background-color: #b22222; /* Rouge foncé */
+    color: white;
+}
+
+.calendar-box .time-slot.reserved {
+    background-color: #ffcccc; /* Rouge clair */
+    cursor: not-allowed;
+}
+
+.calendar-box .time-slot.blocked {
+    background-color: #cccccc; /* Gris */
+    cursor: not-allowed;
+}
+
+.calendar-box .time-slot.past {
+    background-color: #f4f4f4; /* Gris clair */
+    color: #999;
+    cursor: not-allowed;
+}
+
+.calendar-box button {
+    padding: 0.75rem 1.5rem;
+    background: #b22222; /* Rouge foncé */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+.calendar-box button:hover {
+    background: #ff4500; /* Rouge orangé */
+}
+
+.calendar-box button:disabled {
+    background-color: #ccc; /* Gris */
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Styles spécifiques pour le calendrier admin */
+.calendar-box .blockButton {
+    background-color: #b22222; /* Rouge foncé */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.calendar-box .blockButton:hover {
+    background: #ff4500; /* Rouge orangé */
+}
+
+.calendar-box .blockButton:disabled {
+    background-color: #ccc; /* Gris */
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Styles pour calendrier15.html */
+.tables-container {
+    display: flex;
+    gap: 20px; /* Espacement entre les deux tableaux */
+    justify-content: center; /* Centrer les tableaux */
+    margin-top: 20px;
+}
+
+.tables-container table {
+    width: 45%; /* Largeur des tableaux */
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tables-container th,
+.tables-container td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.tables-container th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.tables-container .time-slot {
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.tables-container .time-slot.reserved {
+    background-color: #cccccc; /* Gris */
+    color: white; /* Texte en blanc */
+    font-weight: bold; /* Texte en gras */
+    border: 2px solid #000000; /* Bordure rouge foncé */
+    cursor: not-allowed;
+    padding: 8px 12px; /* Ajustement du padding */
+    border-radius: 5px; /* Bordures arrondies */
+}
+
+.tables-container button {
+    padding: 0.5rem 1rem;
+    background: #b22222; /* Rouge foncé */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.tables-container button:hover {
+    background: #ff4500; /* Rouge orangé */
+}
+
+/* Styles pour les boutons */
 .profile-button {
     padding: 10px 20px;
-    border: none;
+    background: #b22222; /* Rouge foncé */
     color: white;
+    border: none;
     border-radius: 5px;
+    font-size: 1rem;
     cursor: pointer;
+    transition: background 0.3s ease;
+    position: absolute;
+    top: 10px;
+    right: 30px; /* Décalage de 30px depuis la droite (au lieu de 10px) */
+}
+
+.profile-button:hover {
+    background: #ff4500; /* Rouge orangé */
 }
 
 .back-button {
@@ -89,6 +291,7 @@ th {
     cursor: not-allowed;
 }
 
+/* Style pour le formulaire de connexion*/
 .login-container {
     display: flex;
     justify-content: center;

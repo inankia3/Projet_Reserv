@@ -1,99 +1,32 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Calendrier Admin</title>
-    <!-- Votre fichier CSS -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% block title %}Calendrier Admin{% endblock %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            text-align: center;
-            padding: 10px;
-        }
-        .time-slot {
-            cursor: pointer;
-        }
-        .time-slot.selected {
-            background-color: #4CAF50;
-            color: #fff;
-        }
-        .time-slot.blocked {
-            background-color: #ff6666; /* Rouge ou autre couleur */
-            cursor: not-allowed;
-        }
-        .time-slot.past {
-            background-color: #ccc;
-            color: #666;
-            cursor: not-allowed;
-        }
-        /* Bouton bloquer */
-        #blockButton {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #d9534f; /* rouge bootstrap-like */
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #blockButton:hover {
-            background-color: #c9302c;
-        }
-        /* Semaine */
-        #weekSelector {
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <!-- Bouton/lien menant au profil admin -->
-    <a href="{% url 'profilAdmin' %}" class="profile-button">
-        Profil Admin
-    </a>
-    <h2>Calendrier Admin</h2>
+{% block content %}
+<div class="calendar-container">
+    <div class="calendar-box">
+        <h2>Calendrier Admin</h2>
 
-    <!-- Formulaire global pour POST -->
-    <form id="adminCalendarForm" method="POST" action="{% url 'blockSlotsAdmin' %}">
-        {% csrf_token %}
+        <form id="adminCalendarForm" method="POST" action="{% url 'blockSlotsAdmin' %}">
+            {% csrf_token %}
 
-        <div>
-            <label for="weekSelector">Choisir une semaine :</label>
-            <select id="weekSelector"></select>
-        </div>
+            <div>
+                <label for="weekSelector">Choisir une semaine :</label>
+                <select id="weekSelector"></select>
+            </div>
 
-        <table>
-            <thead>
-                <tr id="daysHeader">
-                    <!-- Généré en JavaScript (Lundi..Vendredi) -->
-                </tr>
-            </thead>
-            <tbody id="timeSlotsTable">
-                <!-- Génération dynamique via JS (9h->17h, blocké ou pas) -->
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr id="daysHeader"></tr>
+                </thead>
+                <tbody id="timeSlotsTable"></tbody>
+            </table>
 
-        <!-- Champ caché pour envoyer la liste des créneaux sélectionnés -->
-        <input type="hidden" name="selected_hours" id="selectedHours">
+            <input type="hidden" name="selected_hours" id="selectedHours">
+            <button type="submit" id="blockButton" class="blockButton">Bloquer les créneaux sélectionnés</button>
+        </form>
+    </div>
+</div>
 
-        <button type="submit" id="blockButton">Bloquer les créneaux sélectionnés</button>
-    </form>
-
-    <!-- Script JS séparé -->
-    <script src="{% static 'js/calendrierAdmin.js' %}"></script>
-</body>
-</html>
+<script src="{% static 'js/calendrierAdmin.js' %}"></script>
+{% endblock %}

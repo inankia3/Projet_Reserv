@@ -1,113 +1,40 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Réserver un créneau</title>
-    <!-- Exemple d'inclusion d'un fichier CSS et JS -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <script src="{% static 'js/calendrier.js' %}"></script>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Réserver un créneau{% endblock %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            text-align: center;
-            padding: 10px;
-        }
-        .time-slot {
-            cursor: pointer;
-        }
-        .time-slot.selected {
-            background-color: #4CAF50;
-            color: #fff;
-        }
-        .profile-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px 20px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .profile-button:hover {
-            background-color: #1976D2;
-        }
-        label {
-            display: inline-block;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        select {
-            padding: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50; /* actif */
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        /* Style quand le bouton est disabled */
-        button:disabled {
-            background-color: #ccc; /* grisé */
-            color: #666;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-    </style>
-</head>
-<body>
-    <h2>Réserver un créneau</h2>
+{% block content %}
+<div class="calendar-container">
+    <div class="calendar-box">
+        <h2>Réserver un créneau</h2>
 
-    {% if error_message %}
-        <div class="error-message">
-            <p style="color: red;">{{ error_message }}</p>
-        </div>
-    {% endif %}
+        {% if student_number %}
+            <button class="profile-button" onclick="goToProfilePage('{{ student_number }}')">
+                Profil (Étudiant n°{{ student_number }})
+            </button>
+        {% else %}
+            <p style="color: red; font-weight: bold;">
+                Attention : Aucun numéro étudiant trouvé !
+            </p>
+        {% endif %}
 
-    {% if student_number %}
-        <button class="profile-button" onclick="goToProfilePage('{{ student_number }}')">
-            Profil (Étudiant n°{{ student_number }})
-        </button>
-    {% else %}
-        <p style="color: red; font-weight: bold;">
-            Attention : Aucun numéro étudiant trouvé !
-        </p>
-    {% endif %}
+        <form id="reservationForm" method="POST" action="{{ action_url }}">
+            {% csrf_token %}
 
-    <form id="reservationForm" method="POST" action="{{ action_url }}">
-        {% csrf_token %}
-        <label for="weekSelector">Sélectionner une semaine :</label>
-        <select id="weekSelector"></select>
+            <label for="weekSelector">Sélectionner une semaine :</label>
+            <select id="weekSelector"></select>
 
-        <table>
-            <thead>
-                <tr id="daysHeader"></tr>
-            </thead>
-            <tbody id="timeSlotsTable"></tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr id="daysHeader"></tr>
+                </thead>
+                <tbody id="timeSlotsTable"></tbody>
+            </table>
 
-        <input type="hidden" name="selected_slot" id="selectedSlot">
-        <button id="validateBtn" type="submit" disabled>Valider la sélection</button>
-    </form>
-</body>
-</html>
+            <input type="hidden" name="selected_slot" id="selectedSlot">
+            <button id="validateBtn" type="submit" disabled>Valider la sélection</button>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/calendrier.js' %}"></script>
+{% endblock %}
