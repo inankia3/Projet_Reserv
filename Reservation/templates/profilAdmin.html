@@ -7,40 +7,6 @@
         <h2>Profil Admin</h2>
 
         <div class="section">
-            <h3>Liste des étudiants</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Numéro étudiant</th>
-                        <th>Autorisé ?</th>
-                        <th>Date dernière réserv.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in students %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'profilEtudiant' student.num_etudiant %}">
-                                {{ student.num_etudiant }}
-                            </a>
-                        </td>
-                        <td>
-                            {% if student.autorise %}Oui{% else %}<span class="blocked">Non</span>{% endif %}
-                        </td>
-                        <td>
-                            {% if student.date_derniere_reserv %}
-                                {{ student.date_derniere_reserv|date:"d/m/Y H:i" }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
             <h3>Réservations du jour</h3>
             <table>
                 <thead>
@@ -70,6 +36,40 @@
                     {% empty %}
                     <tr>
                         <td colspan="3">Aucune réservation étudiante aujourd'hui.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>Liste des étudiants</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numéro étudiant</th>
+                        <th>Autorisé ?</th>
+                        <th>Date dernière réserv.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'profilEtudiant' student.num_etudiant %}">
+                                {{ student.num_etudiant }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if student.autorise %}Oui{% else %}<span class="blocked">Non</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if student.date_derniere_reserv %}
+                                {{ student.date_derniere_reserv|date:"d/m/Y H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

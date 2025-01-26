@@ -49,7 +49,7 @@ def codeEtud(request):
             etudiant = Etudiant.objects.create(
                 num_etudiant=num_etud,
                 autorise=True,
-                date_derniere_reserv=datetime.datetime(1, 1, 1, 0, 0, 0)  # 1er janvier de l'an 1 à 00:00
+                date_derniere_reserv=datetime.datetime(1970, 1, 1, 0, 0, 0)  # 1er janvier de l'année 1970 à 00:00
             )
 
         # Stocker le numéro étudiant en session
@@ -168,11 +168,6 @@ def calendrier15(request):
 
         # Vérifier les conditions de réservation
         maintenant = timezone.now()
-
-        # Gérer le cas où date_derniere_reserv est None
-        if etudiant.date_derniere_reserv is None:
-            etudiant.date_derniere_reserv = timezone.now()  - timedelta(hours=25)
-            etudiant.save()
 
         delai_24h = etudiant.date_derniere_reserv + timedelta(hours=24)
 
@@ -424,6 +419,8 @@ def blockSlotsAdmin(request):
     Reçoit en POST `selected_hours` (ex: "2025-02-10 09:00,2025-02-10 10:00") 
     + which_box ("1","2","both").
     Pour chaque créneau d'une heure, on crée 4 (ou 8) reservations admin_field=True.
+    Si un créneau est déjà réservé par un étudiant, on annule cette réservation
+    et on réinitialise sa date_derniere_reserv.
     """
     if request.method == 'POST':
         selected_hours = request.POST.get('selected_hours', '').strip()
@@ -463,6 +460,22 @@ def blockSlotsAdmin(request):
 
             for offset in range(4):
                 creneau_id = first_creneau.id + offset
+
+                # Annuler les réservations étudiantes existantes pour ce créneau
+                reservations_etudiantes = Reservation.objects.filter(
+                    date_field=date_obj,
+                    creneau_id=creneau_id,
+                    admin_field=False  # Seulement les réservations étudiantes
+                )
+
+                # Réinitialiser la date_derniere_reserv des étudiants concernés
+                for reservation in reservations_etudiantes:
+                    etudiant = reservation.etudiant
+                    etudiant.date_derniere_reserv = datetime.datetime(1970, 1, 1, 0, 0, 0)  # Date par défaut
+                    etudiant.save()
+
+                # Supprimer les réservations étudiantes
+                reservations_etudiantes.delete()
 
                 if which_box == "1":
                     Reservation.objects.create(
