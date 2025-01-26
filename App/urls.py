@@ -21,5 +21,6 @@ urlpatterns = [
     path('profilAdmin/', views.profilAdmin, name='profilAdmin'),
     path('toggleBlockStudent/<str:student_number>/', views.toggleBlockStudent, name='toggleBlockStudent'),
     path('blockSlotsAdmin/', views.blockSlotsAdmin, name='blockSlotsAdmin'),
+    path('get_blocked_slots/', views.get_blocked_slots, name='get_blocked_slots'),
     path('cancelReservation/<int:reservation_id>/', views.cancelReservation, name='cancelReservation'),
 ]

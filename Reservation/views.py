@@ -5,6 +5,7 @@ from .models import Etudiant, Creneau, Reservation, Admin
 import datetime
 from datetime import timedelta
 from django.utils import timezone
+from django.http import JsonResponse
 
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
@@ -511,6 +512,40 @@ def toggleBlockStudent(request, student_number):
 
     # Rediriger vers le profil de l'étudiant
     return redirect('profilEtudiant', student_number=student_number)
+
+def get_blocked_slots(request):
+    date = request.GET.get('date')  # Date au format YYYY-MM-DD
+    hour = request.GET.get('hour')  # Heure au format HH:MM
+
+    if not date or not hour:
+        return JsonResponse({'error': 'Date and hour are required'}, status=400)
+
+    # Convertir la date et l'heure en objet datetime
+    from datetime import datetime
+    try:
+        slot_datetime = datetime.strptime(f"{date} {hour}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date or hour format'}, status=400)
+
+    # Récupérer les sous-créneaux de 15 minutes pour cette heure
+    sub_slots = [
+        slot_datetime.replace(minute=0),
+        slot_datetime.replace(minute=15),
+        slot_datetime.replace(minute=30),
+        slot_datetime.replace(minute=45),
+    ]
+
+    # Vérifier si tous les sous-créneaux sont bloqués
+    all_blocked = all(
+        Reservation.objects.filter(
+            date_field=date,
+            creneau__heure_debut=slot.time(),
+            admin_field=True
+        ).exists()
+        for slot in sub_slots
+    )
+
+    return JsonResponse({'all_blocked': all_blocked})
 
 def cancelReservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id)

@@ -3,45 +3,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const daysHeader = document.getElementById('daysHeader');
     const timeSlotsTable = document.getElementById('timeSlotsTable');
     const selectedSlotInput = document.getElementById('selectedSlot');
-    
-    // Si vous avez un bouton "Valider" avec id="validateBtn"
-    // assurez-vous de le récupérer ci-dessous
     const validateBtn = document.getElementById('validateBtn');
-    
+
     let selectedSlot = null;
 
-    // 1) Déterminer le lundi de référence.
-    //    Si on est samedi (6) ou dimanche (0), on bascule sur le lundi suivant.
     function getMondayOfCurrentWeek() {
         const currentDate = new Date();
         let currentDay = currentDate.getDay();  // 0=Dim, 1=Lun,...,6=Sam
 
         if (currentDay === 6 || currentDay === 0) {
-            // Samedi ou dimanche
-            // on veut aller au lundi de la semaine PROCHAINE
-            // samedi => day=6 => 8-6=2 => on avance de 2 jours
-            // dimanche => day=0 => 8-0=8 => on avance de 8 jours
-            const daysToNextMonday = 1 - currentDay; 
+            const daysToNextMonday = 8 - currentDay;
             currentDate.setDate(currentDate.getDate() + daysToNextMonday);
         } else {
-            // Sinon, on se positionne sur le lundi de la semaine en cours
             if (currentDay === 0) {
-                // cas dimanche, on met day=7 (mais on gère déjà plus haut, donc pas indispensable)
                 currentDay = 7;
             }
-            // Soustraire (currentDay - 1) pour se mettre au lundi
             currentDate.setDate(currentDate.getDate() - (currentDay - 1));
         }
 
-        return currentDate; 
+        return currentDate;
     }
 
-    // Génère les options de semaine dans le select <weekSelector>
     function generateWeekOptions() {
-        // lundi de référence
         const monday = getMondayOfCurrentWeek();
-
-        const numberOfWeeks = 4;  
+        const numberOfWeeks = 4;
 
         for (let i = 0; i < numberOfWeeks; i++) {
             const startOfWeek = new Date(monday);
@@ -60,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Génère l'en-tête des jours (lundi..vendredi)
     function generateDaysHeader(weekStart) {
         daysHeader.innerHTML = '';
         const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
@@ -74,46 +58,77 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Génère le tableau des créneaux (9h..16h) pour 5 jours
-    function generateTimeSlots(weekStart) {
+    async function checkIfAllSubSlotsAreBlocked(date, hour) {
+        try {
+            const response = await fetch(`/get_blocked_slots/?date=${date}&hour=${hour}`);
+            const data = await response.json();
+            return data.all_blocked;
+        } catch (error) {
+            console.error('Error fetching blocked slots:', error);
+            return false;
+        }
+    }
+
+    async function generateTimeSlots(weekStart) {
         timeSlotsTable.innerHTML = '';
         const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 
         for (let hour = 9; hour <= 16; hour++) {
             const row = document.createElement('tr');
-            days.forEach((day, index) => {
+            for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
                 const slotCell = document.createElement('td');
                 const currentDate = new Date(weekStart);
-                currentDate.setDate(currentDate.getDate() + index);
+                currentDate.setDate(currentDate.getDate() + dayIndex);
 
                 slotCell.classList.add('time-slot');
                 slotCell.setAttribute('data-date', currentDate.toISOString().split('T')[0]);
                 slotCell.setAttribute('data-time', `${hour}:00`);
-                slotCell.setAttribute('data-day', day);
+                slotCell.setAttribute('data-day', days[dayIndex]);
                 slotCell.textContent = `${hour}:00`;
 
-                // Au clic, on sélectionne
-                slotCell.addEventListener('click', function() {
-                    if (selectedSlot) {
-                        selectedSlot.classList.remove('selected');
-                    }
-                    selectedSlot = slotCell;
-                    slotCell.classList.add('selected');
-                    selectedSlotInput.value = slotCell.getAttribute('data-date') + " " + slotCell.getAttribute('data-time');
+                // Vérifier si tous les sous-créneaux sont passés
+                const now = new Date();
+                const slotDateTime = new Date(currentDate);
+                slotDateTime.setHours(hour, 0, 0, 0);
 
-                    // On active le bouton (si défini)
-                    if (validateBtn) {
-                        validateBtn.disabled = false;
-                    }
+                const allPast = [0, 15, 30, 45].every(minute => {
+                    const subSlotDateTime = new Date(slotDateTime);
+                    subSlotDateTime.setMinutes(minute);
+                    return subSlotDateTime < now;
                 });
 
+                // Vérifier si tous les sous-créneaux sont bloqués
+                const allBlocked = await checkIfAllSubSlotsAreBlocked(currentDate.toISOString().split('T')[0], `${hour}:00`);
+
+                if (allPast || allBlocked) {
+                    slotCell.classList.add('past');
+                    slotCell.style.pointerEvents = 'none'; // Désactiver les clics
+                    slotCell.style.opacity = '0.5'; // Rendre le créneau plus clair
+                }
+
+                // Au clic, on sélectionne uniquement si le créneau n'est ni passé ni bloqué
+                if (!slotCell.classList.contains('past')) {
+                    slotCell.addEventListener('click', function() {
+                        if (selectedSlot) {
+                            selectedSlot.classList.remove('selected');
+                        }
+                        selectedSlot = slotCell;
+                        slotCell.classList.add('selected');
+                        selectedSlotInput.value = slotCell.getAttribute('data-date') + " " + slotCell.getAttribute('data-time');
+
+                        if (validateBtn) {
+                            validateBtn.disabled = false;
+                        }
+                    });
+                }
+
                 row.appendChild(slotCell);
-            });
+            }
             timeSlotsTable.appendChild(row);
         }
     }
 
-    // 1) Génère les semaines
+    // 1) Générer les semaines
     generateWeekOptions();
 
     // 2) Lorsque l'utilisateur choisit une semaine
@@ -134,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
     weekSelector.dispatchEvent(new Event('change'));
 });
 
-// Fonction pour aller au profil étudiant (si besoin)
-function goToProfilePage(numeroEtudiant) {
-    window.location.href = "/profilEtudiant/" + numeroEtudiant + "/";
+function goToProfilePage(studentNumber) {
+    window.location.href = `/profilEtudiant/${studentNumber}/`;
 }
