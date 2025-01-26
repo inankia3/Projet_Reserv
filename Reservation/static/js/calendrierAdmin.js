@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentDay === 0 || currentDay === 6) {
             // Dimanche (0) ou Samedi (6)
             // on avance jusqu'au lundi suivant
-            const daysToNextMonday = 8 - currentDay; 
+            const daysToNextMonday = 1 - currentDay; 
             now.setDate(now.getDate() + daysToNextMonday);
         } else {
             // On se ramène au lundi de la semaine courante

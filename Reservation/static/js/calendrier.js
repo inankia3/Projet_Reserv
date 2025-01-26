@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // on veut aller au lundi de la semaine PROCHAINE
             // samedi => day=6 => 8-6=2 => on avance de 2 jours
             // dimanche => day=0 => 8-0=8 => on avance de 8 jours
-            const daysToNextMonday = 8 - currentDay; 
+            const daysToNextMonday = 1 - currentDay; 
             currentDate.setDate(currentDate.getDate() + daysToNextMonday);
         } else {
             // Sinon, on se positionne sur le lundi de la semaine en cours

@@ -66,8 +66,7 @@
             <p>Aucune réservation passée.</p>
             {% endif %}
         </div>
-
-        <a href="{% url 'vueCalendrier' %}" class="back-button">Retour</a>
+            <a href="{% if is_admin %}{% url 'profilAdmin' %}{% else %}{% url 'vueCalendrier' %}{% endif %}" class="back-button">Retour</a>
     </div>
 </div>
 {% endblock %}

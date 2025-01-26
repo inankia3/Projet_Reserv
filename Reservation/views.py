@@ -77,6 +77,7 @@ def accueilEtud(request):
             }
             return render(request, 'erreur.html', context)
         else:
+            request.session['is_admin'] = False
             # Code correct
             num_etud = request.session.get('NumEtud', '')
             if not num_etud:
@@ -215,7 +216,15 @@ def calendrier15(request):
         etudiant.date_derniere_reserv = maintenant
         etudiant.save()
 
-        return redirect('vueCalendrier')
+        # Ajouter les informations de réservation dans le contexte
+        context = {
+            'reservation_confirmed': True,
+            'reservation_date': date_chosen,
+            'reservation_time': f"{creneau_obj.heure_debut} - {creneau_obj.heure_fin}",
+            'reservation_box': chosen_box_id,
+            'student_number': student_number,
+        }
+        return render(request, 'calendrier15.html', context)
 
     else:
         # --- GET : Affichage des 2 tableaux ---

@@ -78,4 +78,80 @@
         </div>
     </div>
 </div>
+
+<div id="confirmationPopup" class="popup">
+    <div class="popup-content">
+        <h3>Réservation confirmée !</h3>
+        <p>Date: <span id="popupDate"></span></p>
+        <p>Heure: <span id="popupTime"></span></p>
+        <p>Box: <span id="popupBox"></span></p>
+        <button onclick="closePopup()">Fermer</button>
+    </div>
+</div>
+
+<style>
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .popup-content {
+        text-align: center;
+    }
+    .popup button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background: #b22222;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if ("{{ reservation_confirmed }}" === "True") {
+            const popup = document.getElementById('confirmationPopup');
+            const popupDate = document.getElementById('popupDate');
+            const popupTime = document.getElementById('popupTime');
+            const popupBox = document.getElementById('popupBox');
+
+            popupDate.textContent = "{{ reservation_date }}";
+            popupTime.textContent = "{{ reservation_time }}";
+            popupBox.textContent = "{{ reservation_box }}";
+
+            popup.style.display = 'block';
+        }
+    });
+
+    function closePopup() {
+        const popup = document.getElementById('confirmationPopup');
+        popup.style.display = 'none';
+        window.location.href = "{% url 'vueCalendrier' %}";
+    }
+</script>
+
+{% if reservation_confirmed %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupérer les informations de la réservation
+        const reservationDate = "{{ reservation_date }}";
+        const reservationTime = "{{ reservation_time }}";
+        const reservationBox = "{{ reservation_box }}";
+
+        // Afficher le pop-up de confirmation
+        alert(`Réservation confirmée !\n\nDate: ${reservationDate}\nHeure: ${reservationTime}\nBox: ${reservationBox}`);
+        
+        // Rediriger vers le profil après confirmation
+        window.location.href = "{% url 'profilEtudiant' student_number=student_number %}";
+    });
+</script>
+{% endif %}
 {% endblock %}
