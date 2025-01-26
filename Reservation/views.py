@@ -1,12 +1,13 @@
-import re
-from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
-import datetime
 from datetime import timedelta
 from django.utils import timezone
 from django.http import JsonResponse
 
+import re
+import datetime
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
     return render(request, 'index.html')
@@ -36,7 +37,7 @@ def codeEtud(request):
         if not re.match(r'^\d{8}$', num_etud):
             context = {
                 'title': 'Erreur de format',
-                'error': 'Le numéro étudiant doit être un nombre à 8 chiffres.',
+                'error': 'Ce numéro étudiant n\'existe pas',
                 'action_url': reverse('idEtudiant'),
             }
             return render(request, 'erreur.html', context)
@@ -90,7 +91,7 @@ def accueilEtud(request):
                 }
                 return render(request, 'erreur.html', context)
 
-            # Vérifier si l'étudiant est bloqué
+            # Vérifier si l'étudiant a été bloqué par un admin
             etudiant = Etudiant.objects.get(num_etudiant=num_etud)
             if not etudiant.autorise:
                 # Étudiant bloqué
@@ -119,7 +120,6 @@ def accueilEtud(request):
 def vueCalendrier(request):
     """
     Affiche directement la page calendrier.html (sans demander le code).
-    On peut y ajouter un contrôle d'accès si nécessaire.
     """
     # Contrôle d'accès minimal : vérifier que l'utilisateur est un étudiant connecté ou un admin
     if not request.session.get('NumEtud') and not request.session.get('is_admin'):
@@ -129,8 +129,6 @@ def vueCalendrier(request):
     # Passer le student_number si c'est un étudiant
     student_number = request.session.get('NumEtud')
 
-    # Dans 'calendrier.html', vous avez <form action="{{ action_url }}">
-    # => On peut définir action_url, par ex. la vue "calendrier1h_to_15"
     context = {
         'student_number': student_number,
         'action_url': reverse('calendrier1h_to_15'),
@@ -143,7 +141,7 @@ def calendrier1h_to_15(request):
     if request.method == 'POST':
         # Récupérer le créneau choisi (date + heure) depuis le champ hidden 'selected_slot'
         selected_slot = request.POST.get('selected_slot')  # ex: "2025-02-10 13:00"
-        # Stocker en session (ou autrement) pour l'utiliser dans calendrier15
+        # Stocker en session pour l'utiliser dans calendrier15
         if selected_slot:
             date_str, hour_str = selected_slot.split(' ')
             request.session['selected_date'] = date_str
@@ -234,9 +232,6 @@ def calendrier15(request):
         # On détermine quels creneaux (table Creneau) correspondent 
         # aux 4 sous-créneaux de l'heure hour_chosen. 
         # -> ex: 13:00-13:15, 13:15-13:30, 13:30-13:45, 13:45-14:00
-        # 1) Soit vous avez un code pour filtrer la BDD
-        #    => Si vous avez un champ heure_debut, heure_fin, etc.
-        # 2) Soit vous générez 4 "heures_debut" localement, et vous faites un filter.
 
         base_hour = int(hour_chosen.split(':')[0])  # ex 13
         # On construit 4 sous-créneaux => ex: 13:00, 13:15, 13:30, 13:45
@@ -247,10 +242,7 @@ def calendrier15(request):
             (time(base_hour, 30), time(base_hour, 45)),  # 13:30 - 13:45
             (time(base_hour, 45), time(base_hour+1, 0)), # 13:45 - 14:00
         ]
-        # On récupère ces creneaux dans la table Creneau
-        # (ex: SELECT * FROM Creneau WHERE (heure_debut, heure_fin) in (sub_times)).
-        # Selon comment vous stockez, on peut faire un "in" ou on boucle.
-        # Ex. si Creneau a (heure_debut, heure_fin) = (13:00, 13:15) => on matche
+        # On récupère ces creneaux dans la table Creneau avec une boucle
         # On va faire un creneaux_sub = []
         creneaux_sub = []
         for (start, end) in sub_times:
@@ -281,7 +273,7 @@ def calendrier15(request):
                 'id': c.id,
                 'heure_debut': c.heure_debut,
                 'heure_fin': c.heure_fin,
-                'reserved_for_box1': (c.id in reserved_box1),
+                'reserved_for_box1': (c.id in reserved_box1), #booleen
                 'reserved_for_box2': (c.id in reserved_box2),
             })
 
@@ -369,7 +361,7 @@ def adminLogin(request):
 
 def accueilAdmin(request):
     """
-    Accueil Admin : par exemple un calendrierAdmin ou un tableau de bord.
+    Accueil Admin : calendrier
     """
     if not request.session.get('is_admin', False):
         # Accès refusé
@@ -394,7 +386,7 @@ def profilAdmin(request):
     """
     Affiche :
       - la liste de tous les étudiants
-      - les réservations de la semaine qui ne sont pas admin (admin_field=False)
+      - les réservations de la semaine qui ne sont pas bloquée par un admin (admin_field=False)
       Si on est samedi ou dimanche, on affiche les réservations de la semaine suivante.
     """
     # Récupérer tous les étudiants

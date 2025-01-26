@@ -28,7 +28,7 @@ th {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 92vh;
     background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
     font-family: 'Arial', sans-serif;
     padding: 20px;
@@ -305,7 +305,7 @@ th {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 96vh;
     background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
     font-family: 'Arial', sans-serif;
 }
@@ -478,7 +478,7 @@ th {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height:92vh;
     background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
     font-family: 'Arial', sans-serif;
     padding: 20px;
@@ -608,7 +608,7 @@ th {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 92vh;
     background: linear-gradient(135deg, #b22222, #ff4500); /* Rouge foncé à rouge orangé */
     font-family: 'Arial', sans-serif;
     padding: 20px;

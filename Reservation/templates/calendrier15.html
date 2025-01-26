@@ -75,7 +75,10 @@
                 {% endfor %}
                 </tbody>
             </table>
+
         </div>
+        <a href="{% url 'vueCalendrier' %}" class="back-button">Retour</a>
+
     </div>
 </div>
 
@@ -136,6 +139,7 @@
         popup.style.display = 'none';
         window.location.href = "{% url 'vueCalendrier' %}";
     }
+
 </script>
 
 {% if reservation_confirmed %}
