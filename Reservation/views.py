@@ -2,9 +2,9 @@ import re
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
-from django.utils import timezone
 import datetime
 from datetime import timedelta
+from django.utils import timezone
 
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
@@ -40,7 +40,18 @@ def codeEtud(request):
             }
             return render(request, 'erreur.html', context)
 
-        # Si le format est valide, stocker le numéro étudiant en session
+        # Vérifier si l'étudiant existe déjà dans la base de données
+        try:
+            etudiant = Etudiant.objects.get(num_etudiant=num_etud)
+        except Etudiant.DoesNotExist:
+            # Si l'étudiant n'existe pas, le créer avec une date_derniere_reserv standardisée pour éviter les erreurs
+            etudiant = Etudiant.objects.create(
+                num_etudiant=num_etud,
+                autorise=True,
+                date_derniere_reserv=datetime.datetime(1, 1, 1, 0, 0, 0)  # 1er janvier de l'an 1 à 00:00
+            )
+
+        # Stocker le numéro étudiant en session
         request.session['NumEtud'] = num_etud
 
         context = {
