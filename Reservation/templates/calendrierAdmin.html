@@ -14,7 +14,7 @@
         Profil Admin
     </button>
 
-    <form id="reservationForm" method="POST" action="{{ action_url }}">
+    <form id="reservationForm" method="POST" action="{% url 'blockSlotsAdmin' %}">
         {% csrf_token %}
 
         <label for="weekSelector">Sélectionner une semaine :</label>
@@ -32,9 +32,14 @@
                 <!-- Les créneaux horaires avec les réservations seront générés ici par JavaScript -->
             </tbody>
         </table>
-        <input type="hidden" name="selected_slots" id="selectedSlots">
-        <br>
-        <button type="button" id="blockButton">Bloquer les créneaux sélectionnés</button>
+        <input type="hidden" name="selected_hours" id="selectedSlots">
+        <label for="whichBox">Choisir la box à bloquer :</label>
+        <select name="which_box" id="whichBox">
+            <option value="1">Boîte 1</option>
+            <option value="2">Boîte 2</option>
+            <option value="1-2">Boîte 1 et 2</option>
+        </select>
+                <button type="submit" id="blockButton">Bloquer les créneaux sélectionnés</button>
     </form>
 
     <script>
@@ -45,7 +50,7 @@
             const daysHeader = document.getElementById('daysHeader');
             const blockButton = document.getElementById('blockButton');
             let selectedSlots = new Set(); // Utiliser un Set pour stocker les créneaux sélectionnés
-
+/*
             // Données simulées pour les réservations (à remplacer par des données de la base de données)
             const reservations = [
                 { date: '2025-01-24', time: '09:00', student: 'E12345' },
@@ -56,7 +61,7 @@
             let blocked_slots = [
                 { date: '2025-01-24', time: '14:00' },
             ];
-
+*/
             // Générer dynamiquement les options du sélecteur de semaine
             function generateWeekOptions() {
                 const currentDate = new Date();
@@ -97,7 +102,7 @@
             function generateTimeSlots(weekStart) {
                 timeSlotsTable.innerHTML = '';
                 const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-                for (let i = 9; i <= 17; i++) {
+                for (let i = 9; i < 17; i++) {
                     const row = document.createElement('tr');
                     days.forEach((day, index) => {
                         const slotCell = document.createElement('td');
@@ -107,17 +112,17 @@
                         const timeStr = `${i}:00`;
 
                         // Vérifier si le créneau est réservé
-                        const reservation = reservations.find(res => res.date === dateStr && res.time === timeStr);
+                        /*const reservation = reservations.find(res => res.date === dateStr && res.time === timeStr);
                         if (reservation) {
                             slotCell.classList.add('time-slot', 'reserved');
                             slotCell.textContent = `Réservé par ${reservation.student}`;
                         } else if (blocked_slots.find(slot => slot.date === dateStr && slot.time === timeStr)) {
                             slotCell.classList.add('time-slot', 'blocked');
                             slotCell.textContent = 'Bloqué';
-                        } else {
+                        } else {*/
                             slotCell.classList.add('time-slot');
                             slotCell.textContent = timeStr;
-                        }
+                        //}
 
                         slotCell.setAttribute('data-time', timeStr);
                         slotCell.setAttribute('data-day', day);

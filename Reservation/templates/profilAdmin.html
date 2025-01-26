@@ -35,7 +35,34 @@
             </tbody>
         </table>
     </div>
-
+    <div class="section">
+        <h3>Réservations à venir</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Numéro étudiant</th>
+                    <th>Box</th>
+                    <th>Date</th>
+                    <th>Créneau</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_a_venir %}
+                <tr>
+                    <td><a href="{% url 'profilEtudiant' reservation.etudiant.num_etudiant %}">{{ reservation.etudiant.num_etudiant }}</a></td>
+                    <td>{{ reservation.box_id }}</td>
+                    <td>{{ reservation.date_field|date:"l, d F Y" }}</td>
+                    <td>{{ reservation.creneau.heure_debut|time:"H:i"}} - {{reservation.creneau.heure_fin|time:"H:i" }}</td>
+                </tr>
+                {% endfor %}
+                {% if reservations_a_venir|length == 0 %}
+                <tr>
+                    <td colspan="3">Aucune réservation à venir</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
     <div class="section">
         <h3>Liste des étudiants</h3>
         <table>

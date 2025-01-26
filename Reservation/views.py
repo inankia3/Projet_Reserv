@@ -251,18 +251,20 @@ def accueilAdmin(request):
         return redirect('adminLogin')
     context = {
         'title': 'Gestion des réservations - Admin',
-        'action_url': reverse('accueilAdmin'),  # L'action du formulaire pointe vers la même vue
+        #'action_url': reverse('accueilAdmin'),  # L'action du formulaire pointe vers la même vue
     }
     return render(request, 'calendrierAdmin.html', context)
 
 def profilAdmin(request):
     etudiants = Etudiant.objects.all()
     reservations_jour = Reservation.objects.filter(date_field=date.today()).filter(admin_field=0)
+    reservations_a_venir = Reservation.objects.filter(date_field__gt=date.today()).filter(admin_field=0)
 
     context = {
         'title': 'Profil Admin',
         'etudiants': etudiants,
         'reservations_jour': reservations_jour,
+        'reservations_a_venir':reservations_a_venir,
     }
     return render(request, 'profilAdmin.html', context)
 
@@ -281,24 +283,29 @@ def toggleBlockStudent(request, numero_etudiant):
     return redirect('profilEtudiant', numero_etudiant)
 
 
-def blockSlotsAdmin(request):
 
+def blockSlotsAdmin(request):
+    print('test')
     if request.method == 'POST':
         selected_hours = request.POST.get('selected_hours', '').strip()
         which_box = request.POST.get('which_box', '').strip()  # "1","2","1-2"
+        print('test1')
         if not selected_hours:
+            print('test2')
             return redirect('accueilAdmin')
+
         list_slots = selected_hours.split(',')  # ex. ["2025-02-10 09:00", ...]
         for slot in list_slots:
             slot = slot.strip()
             date_str, hour_str = slot.split(' ')
-            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
-            h, m = hour_str.split(':')
-            hour_int = int(h)
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+            heure= datetime.strptime(hour_str,"%H:%M").time()
+            print('test3')
+
             # On trouve le premier creneau 15 min => hour_int:00 -> hour_int:15
-            heure_debut = datetime.time(hour_int, 0)
-            heure_fin = (datetime.datetime.combine(date_obj, heure_debut)
-                         + datetime.timedelta(minutes=15)).time()
+            heure_debut = heure
+            heure_fin = (datetime.combine(date_obj, heure_debut)
+                         + timedelta(minutes=15)).time()
             first_creneau = Creneau.objects.filter(
                 heure_debut=heure_debut,
                 heure_fin=heure_fin
@@ -306,47 +313,75 @@ def blockSlotsAdmin(request):
             if not first_creneau:
                 # ne pas planter, on skip
                 continue
-            # On crée 4 ou 8 reservations
-            # => offset = 0..3 => creneau_id = first_creneau.id + offset
-            # => si which_box = "1", on fait box_id=1
-            # => si which_box = "2", box_id=2
-            # => si "1-2", on fait 2 reservations par offset: box1 + box2
-            for offset in range(4):
-                id_creneau = first_creneau.id + offset
-                if which_box == "1":
-                    Reservation.objects.create(
-                        etudiant_id=None,
-                        box_id=1,
-                        date_field=date_obj,
-                        creneau_id=id_creneau,
-                        admin_field=True
-                    )
-                elif which_box == "2":
-                    Reservation.objects.create(
-                        etudiant_id=None,
-                        box_id=2,
-                        date_field=date_obj,
-                        creneau_id=id_creneau,
-                        admin_field=True
-                    )
-                elif which_box == "12":
-                    # 2 reservations (box1 + box2)
-                    Reservation.objects.create(
-                        etudiant_id=None,
-                        box_id=1,
-                        date_field=date_obj,
-                        creneau_id=id_creneau,
-                        admin_field=True
-                    )
-                    Reservation.objects.create(
-                        etudiant_id=None,
-                        box_id=2,
-                        date_field=date_obj,
-                        creneau_id=id_creneau,
-                        admin_field=True
-                    )
+
+            # Vérifier si le créneau est déjà bloqué
+            existing_reservation = Reservation.objects.filter(
+                date_field=date_obj,
+                creneau_id=first_creneau.id,
+                admin_field=True
+            ).first()
+
+            if existing_reservation:
+                # Débloquer le créneau (supprimer la réservation)
+                existing_reservation.delete()
+            else:
+                # On crée 4 ou 8 reservations
+                for offset in range(4):
+                    id_creneau = first_creneau.id + offset
+                    if which_box == "1":
+                        reserv=Reservation.objects.create(
+                            etudiant_id=None,
+                            box_id=1,
+                            date_field=date_obj,
+                            creneau_id=id_creneau,
+                            admin_field=True
+                        )
+                        reserv.save()
+                    elif which_box == "2":
+                        reserv=Reservation.objects.create(
+                            etudiant_id=None,
+                            box_id=2,
+                            date_field=date_obj,
+                            creneau_id=id_creneau,
+                            admin_field=True
+                        )
+                        reserv.save()
+
+                    elif which_box == "1-2":
+                        # 2 reservations (box1 + box2)
+                        reserv=Reservation.objects.create(
+                            etudiant_id=None,
+                            box_id=1,
+                            date_field=date_obj,
+                            creneau_id=id_creneau,
+                            admin_field=True
+                        )
+                        reserv.save()
+
+                        reserv=Reservation.objects.create(
+                            etudiant_id=None,
+                            box_id=2,
+                            date_field=date_obj,
+                            creneau_id=id_creneau,
+                            admin_field=True
+                        )
+                        reserv.save()
+
+
         return redirect('accueilAdmin')
     else:
         return redirect('accueilAdmin')
 
 
+
+def cancelReservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    etudiant = reservation.etudiant
+
+    # Décrémenter le compteur de réservations à venir
+    if etudiant.reservations_a_venir > 0:
+        etudiant.reservations_a_venir -= 1
+        etudiant.save()
+
+    reservation.delete()
+    return redirect('profilEtudiant', student_number=etudiant.num_etudiant)
