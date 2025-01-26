@@ -119,11 +119,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Dossiers où Django cherche les fichiers statiques
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Dossier global pour les fichiers statiques
-]
-
 # Dossier où les fichiers statiques sont collectés pour la production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

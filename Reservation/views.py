@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from .models import Etudiant, Creneau, Reservation, Admin
@@ -27,13 +28,19 @@ def idEtudiant(request):
 
 
 def codeEtud(request):
-    """
-    Récupère le numéro étudiant (inputEtud), le stocke en session,
-    puis affiche un nouveau formulaire pour le code de vérification.
-    """
     if request.method == 'POST':
         num_etud = request.POST.get('inputEtud')
-        # On stocke le numéro étudiant dans la session
+
+        # Vérifier que le numéro étudiant est un nombre à 8 chiffres
+        if not re.match(r'^\d{8}$', num_etud):
+            context = {
+                'title': 'Erreur de format',
+                'error': 'Le numéro étudiant doit être un nombre à 8 chiffres.',
+                'action_url': reverse('idEtudiant'),
+            }
+            return render(request, 'erreur.html', context)
+
+        # Si le format est valide, stocker le numéro étudiant en session
         request.session['NumEtud'] = num_etud
 
         context = {
@@ -148,6 +155,12 @@ def calendrier15(request):
 
         # Vérifier les conditions de réservation
         maintenant = timezone.now()
+
+        # Gérer le cas où date_derniere_reserv est None
+        if etudiant.date_derniere_reserv is None:
+            etudiant.date_derniere_reserv = timezone.now()  - timedelta(hours=25)
+            etudiant.save()
+
         delai_24h = etudiant.date_derniere_reserv + timedelta(hours=24)
 
         # Compter les réservations à venir
@@ -161,20 +174,20 @@ def calendrier15(request):
             delai_restant = delai_24h - maintenant
             heures_restantes = delai_restant.seconds // 3600
             minutes_restantes = (delai_restant.seconds % 3600) // 60
-            error_message = f"Vous ne pouvez réserver qu'une fois toutes les 24 heures. Temps restant : {heures_restantes}h {minutes_restantes}min."
+            message = f"Vous ne pouvez réserver qu'une fois toutes les 24 heures. Temps restant : {heures_restantes}h {minutes_restantes}min."
             return render(request, 'calendrier.html', {
                 'student_number': student_number,
                 'action_url': reverse('calendrier1h_to_15'),
-                'error_message': error_message,
+                'error_message': message,
             })
 
         if reservations_a_venir >= 2:
             # L'étudiant a déjà 2 réservations à venir
-            error_message = "Vous ne pouvez pas avoir plus de 2 réservations à venir."
+            message = "Vous ne pouvez pas avoir plus de 2 réservations à venir."
             return render(request, 'calendrier.html', {
                 'student_number': student_number,
                 'action_url': reverse('calendrier1h_to_15'),
-                'error_message': error_message,
+                'error_message': message,
             })
 
         # Si les conditions sont remplies, créer la réservation
