@@ -4,7 +4,7 @@ from django.db import models
 class Etudiant(models.Model):
     num_etudiant = models.CharField(unique=True, max_length=8)
     autorise = models.BooleanField(default=True, null=True)
-    date_derniere_reserv = models.DateTimeField(null=True)
+    date_derniere_reserv = models.DateTimeField(default='2000-10-13',null=True)
 
     class Meta:
         managed = False

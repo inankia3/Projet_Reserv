@@ -8,61 +8,7 @@ from datetime import date, datetime, timedelta
 NumEtud=''
 idEtud=0
 def index(request):
-    texte = """
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
-
-            body {
-                font-family: 'Roboto', sans-serif;
-                background-color: #f4f4f4;
-                color: #333;
-                margin: 0;
-                padding: 20px;
-            }
-            header {
-                text-align: center;
-                padding: 10px 0;
-            }
-        h1 {
-
-            font-size: 2em; 
-            margin: 0;
-            padding: 10px 0;
-        }
-            h2 {
-                color: #BF1E2E; /* Rouge inspiré par le logo */
-                font-family: 'Roboto', sans-serif;
-            }
-            a {
-                text-decoration: none;
-            }
-            button {
-                background-color: #BF1E2E; /* Rouge inspiré par le logo */
-                color: white;
-                border: none;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 10px 2px;
-                cursor: pointer;
-                border-radius: 4px;
-            }
-            button:hover {
-                background-color: #9B1623; /* Rouge plus foncé pour l'effet hover */
-            }
-        </style>
-        <header>
-            <h1>Réservation de Box</h1>
-        </header>
-        <h2>Bienvenu.e sur le site de réservation de box "silencieuses"</h2>
-        <br>
-        <a href='/idEtudiant'><button>Etudiant</button></a>
-        <br>
-        <a href='/adminLogin'><button>Admin</button></a>
-    """
-    return HttpResponse(texte)
+    return render(request,'index.html')
 
 
 #--------------
@@ -192,18 +138,22 @@ def calendrier15(request):
         box=request.POST.get('selected_box')
         date=request.session.get('date_s')
         etudiant=request.session.get('NumEtud')
+
         idEtud=Etudiant.objects.get(num_etudiant=etudiant)
-        idCreneau=Creneau.objects.get(id=id_creneau)
-         # Création de la réservation
-        reserv=Reservation.objects.create(
-            etudiant=idEtud,
-            box_id=int(box),
-            creneau=idCreneau,
-            date_field=date,   
-            admin_field=False
-        )
-        reserv.save()
-        # Redirection
+        date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+        reservations_a_venir=Reservation.objects.filter(etudiant=idEtud).filter(date_field__gte=date_obj.today()).order_by('date_field')
+        if reservations_a_venir.count() <2:
+            idCreneau=Creneau.objects.get(id=id_creneau)
+             # Création de la réservation
+            reserv=Reservation.objects.create(
+                etudiant=idEtud,
+                box_id=int(box),
+                creneau=idCreneau,
+                date_field=date,   
+                admin_field=False
+             )
+            reserv.save()
+            # Redirection
         return redirect('vueCalendrier')  # ou accueilEtud, etc.
     else:
         date_str=request.session['date_s']
@@ -307,7 +257,7 @@ def accueilAdmin(request):
 
 def profilAdmin(request):
     etudiants = Etudiant.objects.all()
-    reservations_jour = Reservation.objects.filter(date_field=date.today())
+    reservations_jour = Reservation.objects.filter(date_field=date.today()).filter(admin_field=0)
 
     context = {
         'title': 'Profil Admin',
