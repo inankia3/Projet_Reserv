@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentDay = now.getDay(); // 0=Dim,1=Lun,...6=Sam
 
         if (currentDay === 0 || currentDay === 6) {
-            const daysToNextMonday = 8 - currentDay;
+            const daysToNextMonday = 1 - currentDay;
             now.setDate(now.getDate() + daysToNextMonday);
         } else {
             const daysToMonday = (currentDay + 6) % 7;
