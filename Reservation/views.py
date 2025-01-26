@@ -394,22 +394,41 @@ def profilAdmin(request):
     """
     Affiche :
       - la liste de tous les étudiants
-      - les réservations "du jour" qui ne sont pas admin (admin_field=False)
+      - les réservations de la semaine qui ne sont pas admin (admin_field=False)
+      Si on est samedi ou dimanche, on affiche les réservations de la semaine suivante.
     """
     # Récupérer tous les étudiants
     students = Etudiant.objects.all().order_by('num_etudiant')
 
-    # Réservations du jour (admin_field=False => vraies réservations d'étudiant)
+    # Déterminer le début de la semaine (lundi)
     today = timezone.now().date()
-    reservations_today = Reservation.objects.filter(
-        date_field=today,
+    current_day = today.weekday()  # 0=Lundi, 1=Mardi, ..., 6=Dimanche
+
+    # Si on est samedi (5) ou dimanche (6), on affiche la semaine suivante
+    if current_day >= 5:  # Samedi ou dimanche
+        start_of_week = today + timedelta(days=(7 - current_day))  # Lundi suivant
+    else:
+        start_of_week = today - timedelta(days=current_day)  # Lundi de la semaine en cours
+
+    end_of_week = start_of_week + timedelta(days=6)  # Dimanche de la semaine
+
+    # Récupérer les réservations de la semaine (admin_field=False => vraies réservations d'étudiant)
+    reservations_week = Reservation.objects.filter(
+        date_field__range=[start_of_week, end_of_week],
         admin_field=False
-    ).order_by('creneau__heure_debut')  # ou un autre ordre de tri
+    ).order_by('date_field', 'creneau__heure_debut')
+
+    # Séparer les réservations par box
+    reservations_box1 = reservations_week.filter(box_id=1)
+    reservations_box2 = reservations_week.filter(box_id=2)
 
     context = {
         'title': 'Profil Admin',
         'students': students,
-        'reservations_today': reservations_today,
+        'reservations_box1': reservations_box1,
+        'reservations_box2': reservations_box2,
+        'start_of_week': start_of_week,
+        'end_of_week': end_of_week,
     }
     return render(request, 'profilAdmin.html', context)
 
@@ -561,13 +580,13 @@ def get_blocked_slots(request):
     return JsonResponse({'all_blocked': all_blocked})
 
 def cancelReservation(request, reservation_id):
+    """
+    Annule une réservation et redirige vers la page profilAdmin.
+    """
     reservation = get_object_or_404(Reservation, id=reservation_id)
-    etudiant = reservation.etudiant
 
-    # Décrémenter le compteur de réservations à venir
-    if etudiant.reservations_a_venir > 0:
-        etudiant.reservations_a_venir -= 1
-        etudiant.save()
-
+    # Supprimer la réservation
     reservation.delete()
-    return redirect('profilEtudiant', student_number=etudiant.num_etudiant)
+
+    # Rediriger vers la page profilAdmin
+    return redirect('profilAdmin')

@@ -6,26 +6,30 @@
     <div class="profile-box">
         <h2>Profil Admin</h2>
 
+        <!-- Réservations de la semaine -->
         <div class="section">
-            <h3>Réservations du jour</h3>
+            <h3>Réservations de la semaine ({{ start_of_week|date:"d/m/Y" }} - {{ end_of_week|date:"d/m/Y" }})</h3>
+
+            <!-- Tableau pour le Box 1 -->
+            <h4>Box 1</h4>
             <table>
                 <thead>
                     <tr>
-                        <th>Numéro étudiant</th>
+                        <th>Date</th>
                         <th>Créneau</th>
+                        <th>Étudiant</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for reservation in reservations_today %}
+                    {% for reservation in reservations_box1 %}
                     <tr>
-                        <td>{{ reservation.etudiant.num_etudiant }}</td>
+                        <td>{{ reservation.date_field|date:"d/m/Y" }}</td>
+                        <td>{{ reservation.creneau.heure_debut|time:"H:i" }} - {{ reservation.creneau.heure_fin|time:"H:i" }}</td>
                         <td>
-                            {% if reservation.creneau %}
-                                {{ reservation.creneau.heure_debut }} - {{ reservation.creneau.heure_fin }}
-                            {% else %}
-                                creneau id={{ reservation.creneau_id }}
-                            {% endif %}
+                            <a href="{% url 'profilEtudiant' reservation.etudiant.num_etudiant %}">
+                                {{ reservation.etudiant.num_etudiant }}
+                            </a>
                         </td>
                         <td>
                             <a href="{% url 'cancelReservation' reservation.id %}" class="cancel-btn">
@@ -35,13 +39,49 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3">Aucune réservation étudiante aujourd'hui.</td>
+                        <td colspan="4">Aucune réservation pour le Box 1 cette semaine.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Tableau pour le Box 2 -->
+            <h4>Box 2</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Créneau</th>
+                        <th>Étudiant</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations_box2 %}
+                    <tr>
+                        <td>{{ reservation.date_field|date:"d/m/Y" }}</td>
+                        <td>{{ reservation.creneau.heure_debut|time:"H:i" }} - {{ reservation.creneau.heure_fin|time:"H:i" }}</td>
+                        <td>
+                            <a href="{% url 'profilEtudiant' reservation.etudiant.num_etudiant %}">
+                                {{ reservation.etudiant.num_etudiant }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'cancelReservation' reservation.id %}" class="cancel-btn">
+                                Annuler
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">Aucune réservation pour le Box 2 cette semaine.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
+        <!-- Liste des étudiants -->
         <div class="section">
             <h3>Liste des étudiants</h3>
             <table>
