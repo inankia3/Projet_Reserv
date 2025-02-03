@@ -7,6 +7,12 @@
     <div class="calendar-box">
         <h2>Calendrier Admin</h2>
 
+        {% if error_message %}
+          <div class="error-message">
+              <p>{{ error_message }}</p>
+          </div>
+        {% endif %}
+
         <!-- Bouton pour accéder au profil admin -->
         <a href="{% url 'profilAdmin' %}" class="profile-button">
             Profil Admin
