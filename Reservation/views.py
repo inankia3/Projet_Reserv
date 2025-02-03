@@ -544,14 +544,13 @@ def get_blocked_slots(request):
     if not date or not hour:
         return JsonResponse({'error': 'Date and hour are required'}, status=400)
 
-    # Convertir la date et l'heure en objet datetime
     from datetime import datetime
     try:
         slot_datetime = datetime.strptime(f"{date} {hour}", "%Y-%m-%d %H:%M")
     except ValueError:
         return JsonResponse({'error': 'Invalid date or hour format'}, status=400)
 
-    # Récupérer les sous-créneaux de 15 minutes pour cette heure
+    # Générer les sous-créneaux de 15 minutes pour cette heure : xx:00, xx:15, xx:30, xx:45
     sub_slots = [
         slot_datetime.replace(minute=0),
         slot_datetime.replace(minute=15),
@@ -559,15 +558,26 @@ def get_blocked_slots(request):
         slot_datetime.replace(minute=45),
     ]
 
-    # Vérifier si tous les sous-créneaux sont bloqués
-    all_blocked = all(
-        Reservation.objects.filter(
+    # Pour chaque sous-créneau, on vérifie s'il est bloqué pour les deux boxes.
+    # Un sous-créneau est considéré bloqué si une réservation admin existe pour box 1 ET pour box 2.
+    all_blocked = True
+    for sub_slot in sub_slots:
+        blocked_box1 = Reservation.objects.filter(
             date_field=date,
-            creneau__heure_debut=slot.time(),
-            admin_field=True
+            creneau__heure_debut=sub_slot.time(),
+            admin_field=True,
+            box_id=1
         ).exists()
-        for slot in sub_slots
-    )
+        blocked_box2 = Reservation.objects.filter(
+            date_field=date,
+            creneau__heure_debut=sub_slot.time(),
+            admin_field=True,
+            box_id=2
+        ).exists()
+        # Si au moins une box n'est pas bloquée pour ce sous-créneau, il est disponible.
+        if not (blocked_box1 and blocked_box2):
+            all_blocked = False
+            break
 
     return JsonResponse({'all_blocked': all_blocked})
 
