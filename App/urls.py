@@ -8,6 +8,7 @@ urlpatterns = [
 
     # Parcours étudiant
     path('idEtudiant/', views.idEtudiant, name='idEtudiant'),
+    path('envoyer_code_verification/',views.envoyer_code_verification, name='envoyer_code_verification'),
     path('codeEtud/', views.codeEtud, name='codeEtud'),
     path('accueilEtud/', views.accueilEtud, name='accueilEtud'),
     path('vueCalendrier/', views.vueCalendrier, name='vueCalendrier'),

@@ -5,13 +5,37 @@ from .models import Etudiant, Creneau, Reservation, Admin
 from datetime import timedelta
 from django.utils import timezone
 from django.http import JsonResponse
+from django.core.mail import send_mail
 
+import random
 import re
 import datetime
 # Page d'accueil (simple HttpResponse, vous pouvez en faire un template si vous préférez)
 def index(request):
     return render(request, 'index.html')
 
+def envoyer_code_verification(request):
+    num_etud = request.session.get('NumEtud', '')
+    if not num_etud:
+        return redirect('index.html')
+
+    email = num_etud+"@parisnanterre.fr"  # Récupérer l'e-mail de l'utilisateur
+    code = f"{random.randint(0000, 9999)}"
+    request.session['CodeVerif'] = code
+
+    send_mail(
+        subject="Code de vérification",
+        message=f"Votre code de vérification est : {code}",
+        from_email='bibliothequesi1@gmail.com',#django@mailtrap.club
+        recipient_list=[email]  # Utilisez l'email de l'utilisateur connecté
+    )
+
+    context = {
+        'title': 'Identification Étudiant',
+        'label': 'Code de vérification',
+        'action_url': reverse('accueilEtud'),
+    }
+    return render(request, 'formEtudiant.html', context)
 # -------------
 # ÉTUDIANT
 # -------------
@@ -55,13 +79,14 @@ def codeEtud(request):
 
         # Stocker le numéro étudiant en session
         request.session['NumEtud'] = num_etud
-
+        """
         context = {
             'title': 'Identification Étudiant',
             'label': 'Code de vérification',
             'action_url': reverse('accueilEtud'),
         }
-        return render(request, 'formEtudiant.html', context)
+        return render(request, 'formEtudiant.html', context)"""
+        return redirect('envoyer_code_verification')
     else:
         # Si on accède directement en GET, on redirige vers idEtudiant
         return redirect('idEtudiant')
@@ -70,7 +95,7 @@ def codeEtud(request):
 def accueilEtud(request):
     if request.method == 'POST':
         code = request.POST.get('inputEtud')
-        if code != "0000":
+        if code != request.session.get('CodeVerif',''):
             # Code erroné
             context = {
                 'title': 'Erreur lors de la validation du code de vérification',

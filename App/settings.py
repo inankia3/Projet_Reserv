@@ -26,9 +26,13 @@ SECRET_KEY = 'django-insecure-*b(6w)5ff9ytxy4+!330mvb6^u!(pfx@uxn4ook=dogx*v@cr3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['inankia.pythonanywhere.com']
-
-
+ALLOWED_HOSTS = ['inankia.pythonanywhere.com','127.0.0.1']
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bibliothequesi1@gmail.com'
+EMAIL_HOST_PASSWORD = 'oozo csmm qiki htbn'  # Use the app password generated
 # Application definition
 
 INSTALLED_APPS = [
